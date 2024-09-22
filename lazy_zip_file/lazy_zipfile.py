@@ -10,25 +10,34 @@ import zipfile
 
 
 def lazy_read_zip_file_contents(path: str
-                                ) -> typing.Dict[str, typing.Generator]:
+                                ) -> typing.Dict[str,
+                                                 typing.Generator[bytes,
+                                                                  None,
+                                                                  None]]:
     """
     Reads the contents of a ZIP file lazily by returning a dictionary
     comprehension where all the file names are mapped to a generator that
-    yields the bytes content.
+    yields the bytes content. The content can be retrieved by calling the
+    generator.
+
+    >>> zp_dict = lazy_read_zip_file_contents("file.zip")
+    >>> file_contents = next(zp_dict(filename))
 
     Parameters
     ----------
     path : str
         The path to the ZIP file.
 
-    Yields
+    Returns
     ------
-    typing.Dict[str, typing.Generator]:
+    typing.Dict[str, typing.Generator[bytes, None, None]]:
         A dictionary with file names as keys and generators with the content as
         values.
 
     """
-    def _read_file_contents(filename: str) -> bytes:
+    def _read_file_contents(filename: str) -> typing.Generator[bytes,
+                                                               None,
+                                                               None]:
         """
         Reads the contents of a specific file within the ZIP file.
 
@@ -39,7 +48,7 @@ def lazy_read_zip_file_contents(path: str
 
         Yields
         ------
-        bytes
+        typing.Generator[bytes, None, None]
             The contents of the file.
 
         """
@@ -52,13 +61,20 @@ def lazy_read_zip_file_contents(path: str
             return {file_name: _read_file_contents(file_name)
                     for file_name in zip_file.namelist()}
     # Handle the case where the ZIP file is invalid
-    except zipfile.BadZipFile as bze:
-        warnings.warn(f"{bze}: {path}")
+    except (zipfile.BadZipFile, PermissionError) as exception:
+        warnings.warn(f"{exception}: {path}")
 
 
-def demo():
+def demo(depth: int = 3):
     """
-    Demonstrates the usage of lazy_read_zip_file_contents.
+    Demonstrates the usage of lazy_read_zip_file_contents by scanning for and
+    opening zip files to map their content size againts the size of the
+    generated dictionaries.
+
+    Parameters
+    ----------
+    depth : int
+        The depth of the directory structure to search for ZIP files.
 
     Returns
     -------
@@ -71,8 +87,9 @@ def demo():
     import matplotlib.pyplot as plt
 
     sizes: typing.List[tuple] = []
-    search_path: str = os.path.join("..", "..", "**", "*.zip")
-    paths: typing.Generator[str] = glob.iglob(search_path, recursive=True)
+    search_path: str = os.path.join(*[".."]*depth, "**", "*.zip")
+    paths: typing.Generator[str, None, None] = glob.iglob(search_path,
+                                                          recursive=True)
 
     for path in paths:
         dic: typing.Dict = lazy_read_zip_file_contents(path)
@@ -94,8 +111,9 @@ def demo():
 
     size_d, size_c = list(zip(*sizes))
 
-    fig, ax = plt.subplots(figsize=(10, 5))
+    _, ax = plt.subplots(figsize=(10, 7))
     ax.scatter(size_d, size_c, c="orange")
+    plt.xscale("log")
     plt.yscale("log")
     ax.set_xlabel("Rate of total content size to dictionary size in memory")
     ax.set_ylabel("Content Size")
