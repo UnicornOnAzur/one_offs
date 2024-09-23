@@ -12,4 +12,4 @@ PRs accepted.
 
 ## License
 
-MIT ©
+MIT
