@@ -2,6 +2,9 @@
 """
 @author: UnicornOnAzur
 
+A method to lazily read the contents of a ZIP file. This approach allows for
+memory-efficient handling of potentially large files by yielding their contents
+only when requested, rather than loading everything into memory at once.
 """
 # Standard library
 import typing
