@@ -21,7 +21,7 @@ def lazy_read_zip_file_contents(path: str
     generator.
 
     >>> zp_dict = lazy_read_zip_file_contents("file.zip")
-    >>> file_contents = next(zp_dict(filename))
+    >>> file_contents = next(zp_dict[filename])
 
     Parameters
     ----------
@@ -52,12 +52,11 @@ def lazy_read_zip_file_contents(path: str
             The contents of the file.
 
         """
-        with zipfile.ZipFile(path) as zf:
-            with zf.open(filename) as f:
-                yield f.read()
+        with zipfile.ZipFile(path, allowZip64 = True) as zf:
+            yield zf.read(filename)
 
     try:
-        with zipfile.ZipFile(path) as zip_file:
+        with zipfile.ZipFile(path, allowZip64 = True) as zip_file:
             return {file_name: _read_file_contents(file_name)
                     for file_name in zip_file.namelist()}
     # Handle the case where the ZIP file is invalid
@@ -73,7 +72,7 @@ def demo(depth: int = 3):
 
     Parameters
     ----------
-    depth : int
+    depth : int, default 3.
         The depth of the directory structure to search for ZIP files.
 
     Returns
@@ -87,7 +86,7 @@ def demo(depth: int = 3):
     import matplotlib.pyplot as plt
 
     sizes: typing.List[tuple] = []
-    search_path: str = os.path.join(*[".."]*depth, "**", "*.zip")
+    search_path: str = os.path.join(*[".."]*max(abs(depth), 1), "**", "*.zip")
     paths: typing.Generator[str, None, None] = glob.iglob(search_path,
                                                           recursive=True)
 
@@ -109,6 +108,9 @@ def demo(depth: int = 3):
         print(f"The size of the content is: {max(content_size)} bytes.")
         sizes.append((sum(content_size)/size, max(content_size)))
 
+    if not sizes:
+        print("No ZIP files were found.")
+        return
     size_d, size_c = list(zip(*sizes))
 
     _, ax = plt.subplots(figsize=(10, 7))
