@@ -55,11 +55,11 @@ def lazy_read_zip_file_contents(path: str
             The contents of the file.
 
         """
-        with zipfile.ZipFile(path, allowZip64 = True) as zf:
+        with zipfile.ZipFile(path, allowZip64=True) as zf:
             yield zf.read(filename)
 
     try:
-        with zipfile.ZipFile(path, allowZip64 = True) as zip_file:
+        with zipfile.ZipFile(path, allowZip64=True) as zip_file:
             return {file_name: _read_file_contents(file_name)
                     for file_name in zip_file.namelist()}
     # Handle the case where the ZIP file is invalid
