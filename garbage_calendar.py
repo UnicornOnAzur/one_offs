@@ -17,20 +17,20 @@ import ics
 import pypdf
 
 
-def read_document(path: str) -> typing.List[typing.Tuple[int, int, int, str]]:
+def read_document() -> typing.List[typing.Tuple[int, int, int, str]]:
     """
     Extracts dates and descriptions from a PDF file to a list of dates.
 
     Parameters
     ----------
-    path : str
-        Location of the PDF containing the calendar.
+    None
 
     Returns
     -------
     collection_dates : typing.List[typing.Tuple[int, int, int, str]]
         List of tuples containing year, month, day, and description.
     """
+    path: str = glob.glob("../data/a*9.pdf")[0]
     try:
         reader: pypdf.PdfReader = pypdf.PdfReader(path)
     except FileNotFoundError:
@@ -131,7 +131,7 @@ def save_calendar(cal: ics.Calendar) -> None:
     None.
 
     """
-    with open("output/calendar.ics", mode="w", encoding="utf-8") as my_file:
+    with open("calendar.ics", mode="w", encoding="utf-8") as my_file:
         # remove all the new lines
         my_file.write(cal.serialize().replace("\n", ""))
 
@@ -144,8 +144,7 @@ def main() -> None:
     -------
     None.
     """
-    filepath: str = glob.glob("../data/a*9.pdf")[0]
-    dates: typing.List = read_document(filepath)
+    dates: typing.List = read_document()
     calendar: ics.Calendar = make_calendar(dates)
     save_calendar(calendar)
 
