@@ -30,7 +30,7 @@ def read_document() -> typing.List[typing.Tuple[int, int, int, str]]:
     collection_dates : typing.List[typing.Tuple[int, int, int, str]]
         List of tuples containing year, month, day, and description.
     """
-    path: str = glob.glob("../data/a*9.pdf")[0]
+    path: str = glob.glob("data/a*9.pdf")[0]
     try:
         reader: pypdf.PdfReader = pypdf.PdfReader(path)
     except FileNotFoundError:
@@ -39,6 +39,8 @@ def read_document() -> typing.List[typing.Tuple[int, int, int, str]]:
         raise pypdf.errors.PyPdfError(
             "While reading the PDF file an error occured.")
     front_page: pypdf.PageObject = reader.pages[0]
+    # extract text preserving horizontal positioning without excess vertical
+    # whitespace (removes blank and "whitespace only" lines)
     text: str = front_page.extract_text(extraction_mode="layout",
                                         layout_mode_space_vertically=False
                                         )
@@ -117,9 +119,9 @@ def make_calendar(pickup_dates: typing.List[typing.Tuple[int, int, int, str]]
     return calendar
 
 
-def save_calendar(cal: ics.Calendar) -> None:
+def write_calendar(cal: ics.Calendar) -> None:
     """
-    Saves the calendar object to a file.
+    Writes the calendar object to a file.
 
     Parameters
     ----------
@@ -132,8 +134,15 @@ def save_calendar(cal: ics.Calendar) -> None:
 
     """
     with open("calendar.ics", mode="w", encoding="utf-8") as my_file:
-        # remove all the new lines
-        my_file.write(cal.serialize().replace("\n", ""))
+        timestamp: str = datetime.datetime.now().strftime("%Y%m%dT%H%M%SZ")
+        clrf: str = "\n"
+        for line in cal.serialize_iter():
+            line: str = line.strip("\r\n")
+            # remove all the new lines characters
+            my_file.write(f"{line}{clrf}")
+            # write the timestamp of creating the event in the event
+            if line.startswith("BEGIN:VE"):
+                my_file.write(f"DTSTAMP:{timestamp}{clrf}")
 
 
 def main() -> None:
@@ -146,7 +155,7 @@ def main() -> None:
     """
     dates: typing.List = read_document()
     calendar: ics.Calendar = make_calendar(dates)
-    save_calendar(calendar)
+    write_calendar(calendar)
 
 
 if __name__ == "__main__":
