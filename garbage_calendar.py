@@ -65,7 +65,7 @@ def read_document() -> typing.List[typing.Tuple[int, int, int, str]]:
         if line.strip().startswith("Ver"):
             break
 
-        # Whenever the months are mentioned, repopulate the typing.List
+        # Whenever the months are mentioned, repopulate the parts list
         parts: typing.List[str] = line.strip().split()
         if len(parts) == 4:
             months: typing.List = parts
