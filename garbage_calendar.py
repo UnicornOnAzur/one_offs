@@ -4,7 +4,7 @@
 
 Create a calendar using ics based on the dates extracting from the PDF file
 using pypdf. The process involves reading the document to extract a list of
-dates, creating a calendar from that list, and finally, saving the calendar
+dates, creating a calendar from that list, and finally, writing the calendar
 to a file.
 """
 # Standard library
