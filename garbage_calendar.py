@@ -41,9 +41,9 @@ def read_document() -> typing.List[typing.Tuple[int, int, int, str]]:
     front_page: pypdf.PageObject = reader.pages[0]
     # extract text preserving horizontal positioning without excess vertical
     # whitespace (removes blank and "whitespace only" lines)
-    text: str = front_page.extract_text(extraction_mode="layout",
-                                        layout_mode_space_vertically=False
-                                        )
+    lines: str = front_page.extract_text(extraction_mode="layout",
+                                         layout_mode_space_vertically=False
+                                         ).split("\n")
     date_column_found: bool = False
     collection_dates: typing.List[typing.Tuple[int, int, int, str]] = []
     current_year: int = datetime.datetime.now().year
@@ -54,7 +54,7 @@ def read_document() -> typing.List[typing.Tuple[int, int, int, str]]:
                                  ]
     all_months: typing.List = []
 
-    for line in text.split("\n"):
+    for line in lines:
         # Look for the first month to find the beginning of the calender
         if line.strip().startswith("Jan"):
             date_column_found = True
