@@ -39,14 +39,14 @@ def read_document() -> typing.List[typing.Tuple[int, int, int, str]]:
         raise pypdf.errors.PyPdfError(
             "While reading the PDF file an error occured.")
     front_page: pypdf.PageObject = reader.pages[0]
-    # extract text preserving horizontal positioning without excess vertical
+    # Extract text preserving horizontal positioning without excess vertical
     # whitespace (removes blank and "whitespace only" lines)
     lines: str = front_page.extract_text(extraction_mode="layout",
-                                         layout_mode_space_vertically=False
+                                         layout_mode_space_vertically=True
                                          ).split("\n")
     date_column_found: bool = False
     collection_dates: typing.List[typing.Tuple[int, int, int, str]] = []
-    current_year: int = datetime.datetime.now().year
+    current_year: int = int(lines[0].strip())
     spacing: typing.List[int] = [1,    # start of first column
                                  58,   # start of second column
                                  114,  # start of third column
@@ -58,6 +58,7 @@ def read_document() -> typing.List[typing.Tuple[int, int, int, str]]:
         # Look for the first month to find the beginning of the calender
         if line.strip().startswith("Jan"):
             date_column_found = True
+        # If the table doesn't start in this line go to the next line
         if not date_column_found:
             continue
         # Stop at the line containing the version because it is below the
@@ -68,10 +69,11 @@ def read_document() -> typing.List[typing.Tuple[int, int, int, str]]:
         # Whenever the months are mentioned, repopulate the parts list
         parts: typing.List[str] = line.strip().split()
         if len(parts) == 4:
-            months: typing.List = parts
-            all_months.extend(months)
+            all_months.extend((months := parts))
             continue
+
         # Loop over the line after it has been divided according to the spacing
+        # to extract the dates and descriptions
         for step, text in enumerate([line[a:b].strip()
                                      for a, b
                                      in itertools.pairwise([*spacing, None])]
@@ -101,7 +103,6 @@ def make_calendar(pickup_dates: typing.List[typing.Tuple[int, int, int, str]]
     -------
     calendar : ics.Calendar
         The resulting calendar.
-
     """
     HOURS_BEFORE_MIDNIGHT: int = 4
     HOURS_AFTER_MIDNIGHT: int = 16
@@ -109,40 +110,37 @@ def make_calendar(pickup_dates: typing.List[typing.Tuple[int, int, int, str]]
     for (year, month, day, description) in pickup_dates:
         event_date: datetime.datetime = datetime.datetime(year, month, day)
         event: ics.Event = ics.Event()
-        event.begin: datetime.datetime =\
-            event_date - datetime.timedelta(hours=HOURS_BEFORE_MIDNIGHT)
-        event.end: datetime.datetime =\
-            event_date + datetime.timedelta(hours=HOURS_AFTER_MIDNIGHT)
-        event.name: str = description
-        event.transparent: bool = True
+        event.begin = event_date -\
+            datetime.timedelta(hours=HOURS_BEFORE_MIDNIGHT)
+        event.end = event_date +\
+            datetime.timedelta(hours=HOURS_AFTER_MIDNIGHT)
+        event.name = description
         calendar.events.add(event)
     return calendar
 
 
-def write_calendar(cal: ics.Calendar) -> None:
+def write_calendar(calendar: ics.Calendar) -> None:
     """
     Writes the calendar object to a file.
 
     Parameters
     ----------
-    cal : ics.Calendar
+    calendar : ics.Calendar
         The created calendar.
 
     Returns
     -------
     None.
-
     """
-    with open("calendar.ics", mode="w", encoding="utf-8") as my_file:
+    with open("calendar.ics", mode="w", encoding="utf-8") as file:
         timestamp: str = datetime.datetime.now().strftime("%Y%m%dT%H%M%SZ")
-        clrf: str = "\n"
-        for line in cal.serialize_iter():
-            line: str = line.strip("\r\n")
-            # remove all the new lines characters
-            my_file.write(f"{line}{clrf}")
-            # write the timestamp of creating the event in the event
-            if line.startswith("BEGIN:VE"):
-                my_file.write(f"DTSTAMP:{timestamp}{clrf}")
+        crlf: str = "\n"
+        for line in calendar.serialize_iter():
+            # Replace the current CRLF sequence with a new one
+            file.write(line.replace("\r\n", crlf))
+            # Write the timestamp of creating the event in the event
+            if line.startswith("BEGIN:VEVENT"):
+                file.write(f"DTSTAMP:{timestamp}{crlf}")
 
 
 def main() -> None:
