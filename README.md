@@ -11,7 +11,3 @@ Listed newest to oldest:
 ## Contributing
 
 PRs accepted.
-
-## License
-
-MIT
