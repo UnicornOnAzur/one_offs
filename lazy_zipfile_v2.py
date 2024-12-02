@@ -12,14 +12,43 @@ import warnings
 import zipfile
 
 
-class ZIPdict(dict):
-    def __getitem__(self, key):
-        return next(super().__getitem__(key))
+class LazyZIPdict(dict):
+    """
+    A dictionary subclass that lazily retrieves values from a zip object.
+
+    This class overrides the __getitem__ method to return the next item from
+    the iterator of the value associated with the given key. If the value is
+    not an iterator, it raises a TypeError.
+    """
+
+    def __getitem__(self, key: str) -> bytes:
+        """
+        Retrieve the next item from the iterator associated with the given key.
+
+        Parameters
+        ----------
+        key : str
+            The key for which to retrieve the next item.
+
+        Returns
+        -------
+        bytes
+            The next item from the iterator.
+
+        Raises
+        ------
+        TypeError
+            If the value for the key is not iterable.
+        """
+        value: typing.Generator[bytes, None, None] = super().__getitem__(key)
+        if not hasattr(value, '__iter__'):
+            raise TypeError(f"The value for key '{key}' is not iterable.")
+        return next(value)
 
 
 def lazy_read_zip_file_contents(path: str
                                 ) -> typing.Dict[str,
-                                                 ZIPdict]:
+                                                 LazyZIPdict]:
     """
     Reads the contents of a ZIP file lazily by returning a dictionary
     comprehension where all the file names are mapped to a generator that
@@ -27,7 +56,7 @@ def lazy_read_zip_file_contents(path: str
     generator.
 
     >>> zp_dict = lazy_read_zip_file_contents("file.zip")
-    >>> file_contents = next(zp_dict[filename])
+    >>> file_contents = zp_dict[filename]
 
     Parameters
     ----------
@@ -36,34 +65,21 @@ def lazy_read_zip_file_contents(path: str
 
     Returns
     ------
-    typing.Dict[str, ZIPdict]:
+    typing.Dict[str, LazyZIPdict]
         A dictionary with file names as keys and the content as values.
 
+    Raises
+    ------
+    warnings
+        If the ZIP file is invalid or cannot be accessed.
+
     """
-    def _read_file_contents(filename: str) -> typing.Generator[bytes,
-                                                               None,
-                                                               None]:
-        """
-        Reads the contents of a specific file within the ZIP file.
-
-        Parameters
-        ----------
-        filename : str
-            The name of the file in the ZIP file to read.
-
-        Yields
-        ------
-        typing.Generator[bytes, None, None]
-            The contents of the file.
-
-        """
-        with zipfile.ZipFile(path, "r", allowZip64=True) as zf:
-            yield zf.read(filename)
-
     try:
         with zipfile.ZipFile(path, "r", allowZip64=True) as zip_file:
-            return ZIPdict({file_name: _read_file_contents(file_name)
-                            for file_name in zip_file.namelist()})
+            return LazyZIPdict({file_name: (file
+                                            for file
+                                            in [zip_file.read(file_name)])
+                                for file_name in zip_file.namelist()})
     # Handle the case where the ZIP file is invalid
     except (zipfile.BadZipFile, PermissionError) as exception:
         warnings.warn(f"{exception}: {path}")
