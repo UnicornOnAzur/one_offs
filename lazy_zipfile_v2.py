@@ -47,8 +47,7 @@ class LazyZIPdict(dict):
 
 
 def lazy_read_zip_file_contents(path: str
-                                ) -> typing.Dict[str,
-                                                 LazyZIPdict]:
+                                ) -> LazyZIPdict:
     """
     Reads the contents of a ZIP file lazily by returning a dictionary
     comprehension where all the file names are mapped to a generator that
@@ -65,7 +64,7 @@ def lazy_read_zip_file_contents(path: str
 
     Returns
     ------
-    typing.Dict[str, LazyZIPdict]
+    LazyZIPdict
         A dictionary with file names as keys and the content as values.
 
     Raises
