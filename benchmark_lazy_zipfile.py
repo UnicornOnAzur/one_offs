@@ -99,7 +99,7 @@ def main():
                                 ["#003f5c", "#58508d", "#bc5090", "#ff6361"],
                                 ["small_1", "large_1", "small_2", "large_2"]):
         axes[1].plot(res, color=color, label=name)
-    axes[1].legend(loc="upper left")
+    axes[1].legend(loc="upper left", ncols=2)
     axes[1].set_xlim([0, len(sized_results[0])])
     axes[1].set_ylim([0, max(map(max, sized_results)) + 50])
     plt.show(block=True)
