@@ -45,6 +45,20 @@ class LazyZIPdict(dict):
             raise TypeError(f"The value for key '{key}' is not iterable.")
         return next(value)
 
+    def contents(self):
+        """
+        Prints the keys of the object in a formatted manner.
+
+        This method retrieves all the keys from the object and prints them,
+        each on a new line. It is useful for quickly viewing the contents
+        of the object.
+
+        Returns
+        -------
+            None
+        """
+        print("\n".join(self.keys()))
+
 
 def lazy_read_zip_file_contents(path: str
                                 ) -> LazyZIPdict:
@@ -63,7 +77,7 @@ def lazy_read_zip_file_contents(path: str
         The path to the ZIP file.
 
     Returns
-    ------
+    -------
     LazyZIPdict
         A dictionary with file names as keys and the content as values.
 
