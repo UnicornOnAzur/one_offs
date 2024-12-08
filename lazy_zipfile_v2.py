@@ -57,7 +57,7 @@ class LazyZIPdict(dict):
         -------
             None
         """
-        print("\n".join(self.keys()))
+        print("\n".join(sorted(self.keys())))
 
 
 def lazy_read_zip_file_contents(path: str
