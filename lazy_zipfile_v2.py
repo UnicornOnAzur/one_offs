@@ -7,6 +7,7 @@ memory-efficient handling of potentially large files by yielding their contents
 only when requested, rather than loading everything into memory at once.
 """
 # Standard library
+import itertools
 import typing
 import warnings
 import zipfile
@@ -91,7 +92,9 @@ def lazy_read_zip_file_contents(path: str
         with zipfile.ZipFile(path, "r", allowZip64=True) as zip_file:
             return LazyZIPdict({file_name: (file
                                             for file
-                                            in [zip_file.read(file_name)])
+                                            in itertools.repeat(
+                                                zip_file.read(file_name))
+                                            )
                                 for file_name in zip_file.namelist()})
     # Handle the case where the ZIP file is invalid
     except (zipfile.BadZipFile, PermissionError) as exception:
