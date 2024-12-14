@@ -2,15 +2,17 @@
 """
 @author: UnicornOnAzur
 
-Create a calendar using ics based on the dates extracting from the PDF file
-using pypdf. The process involves reading the document to extract a list of
-dates, creating a calendar from that list, and finally, writing the calendar
-to a file.
+Create a calendar using ics based on the dates extracted from a PDF file using
+pypdf. The process involves reading the document to extract a list of dates,
+creating a calendar from that list, and finally, writing the calendar to a
+file.
 """
 # Standard library
+import collections
 import glob
 import datetime
 import itertools
+import re
 import typing
 # Third party
 import ics
@@ -27,8 +29,8 @@ def read_document() -> typing.List[typing.Tuple[int, int, int, str]]:
 
     Returns
     -------
-    collection_dates : typing.List[typing.Tuple[int, int, int, str]]
-        List of tuples containing year, month, day, and description.
+    collection_dates : List of tuples containing year, month, day, and
+    description.
     """
     path: str = glob.glob(r"data/a*[0-9].pdf")[2]
     try:
@@ -37,7 +39,7 @@ def read_document() -> typing.List[typing.Tuple[int, int, int, str]]:
         raise FileNotFoundError("The desired input file was not found")
     except pypdf.errors.PyPdfError:
         raise pypdf.errors.PyPdfError(
-            "While reading the PDF file an error occured.")
+            "An error occurred while reading the PDF file.")
     front_page: pypdf.PageObject = reader.pages[0]
     # Extract text preserving horizontal positioning without excess vertical
     # whitespace (removes blank and "whitespace only" lines)
@@ -47,12 +49,9 @@ def read_document() -> typing.List[typing.Tuple[int, int, int, str]]:
     date_column_found: bool = False
     collection_dates: typing.List[typing.Tuple[int, int, int, str]] = []
     current_year: int = int(lines[0].strip())
-    spacing: typing.List[int] = [1,    # start of first column
-                                 58,   # start of second column
-                                 114,  # start of third column
-                                 172   # start of fourth column
-                                 ]
     all_months: typing.List = []
+
+    spacing = _determine_spacing(lines)
 
     for line in lines:
         # Look for the first month to find the beginning of the calender
@@ -71,10 +70,6 @@ def read_document() -> typing.List[typing.Tuple[int, int, int, str]]:
         if len(parts) == 4:
             all_months.extend((months := parts))
             continue
-        # Special case: some columns overlap the headers.
-        if len(parts) == 7:
-            all_months.extend((months := ["May", "June", "July", "August"]))
-            line = " ".join([parts[0], parts[1], parts[3], parts[4]])
 
         # Loop over the line after it has been divided according to the spacing
         # to extract the dates and descriptions
@@ -84,19 +79,36 @@ def read_document() -> typing.List[typing.Tuple[int, int, int, str]]:
                                     ):
             if not text:  # Skip empty columns
                 continue
-            try:
-                _, day, *a, description = text.strip().split()
-            except ValueError:
-                # print(text)
-                continue
+            _, day, *_, description = text.strip().split()
             collection_dates.append((current_year,
                                      all_months.index(months[step])+1,
                                      int(day),
                                      description))
-            if collection_dates[-1] == (2025, 2, 30, "Restafval"):
-                print(text, step,  months)
-            # print(collection_dates)
     return collection_dates
+
+
+def _determine_spacing(lines: typing.List[str]) -> typing.List[int]:
+    """
+    Determine the starting positions of the four most common words (with three
+    or more lowercase letters) in a list of lines, which will be the starting
+    word of the columns.
+
+    Parameters
+    ----------
+        lines: A list of strings, where each string represents a
+        line of text.
+
+    Returns
+    -------
+        spacing : A sorted list of the starting positions of the four most
+        common words.
+    """
+    matches: collections.Counter = collections.Counter([
+                            match.start()
+                            for line in lines
+                            for match in re.finditer(r"\b[a-z]{3,}\b", line)])
+    spacing: list[int] = sorted([val[0] for val in matches.most_common(4)])
+    return spacing
 
 
 def make_calendar(pickup_dates: typing.List[typing.Tuple[int, int, int, str]]
@@ -107,23 +119,17 @@ def make_calendar(pickup_dates: typing.List[typing.Tuple[int, int, int, str]]
 
     Parameters
     ----------
-    pickup_dates : typing.List[typing.Tuple[int, int, int, str]]
-        typing.List of year, month, day, and description.
+    pickup_dates : list of year, month, day, and description.
 
     Returns
     -------
-    calendar : ics.Calendar
-        The resulting calendar.
+    calendar : The resulting calendar.
     """
     HOURS_BEFORE_MIDNIGHT: int = 4
     HOURS_AFTER_MIDNIGHT: int = 16
     calendar: ics.Calendar = ics.Calendar()
     for (year, month, day, description) in pickup_dates:
-        try:
-            event_date: datetime.datetime = datetime.datetime(year, month, day)
-        except ValueError:
-            print(year, month, day, description)
-            continue
+        event_date: datetime.datetime = datetime.datetime(year, month, day)
         event: ics.Event = ics.Event()
         event.begin = event_date -\
             datetime.timedelta(hours=HOURS_BEFORE_MIDNIGHT)
@@ -140,8 +146,7 @@ def write_calendar(calendar: ics.Calendar) -> None:
 
     Parameters
     ----------
-    calendar : ics.Calendar
-        The created calendar.
+    calendar : The created calendar.
 
     Returns
     -------
@@ -160,13 +165,18 @@ def write_calendar(calendar: ics.Calendar) -> None:
 
 def main() -> None:
     """
-    After taking the path from the text file call all the functions in order.
+    Executes the main workflow of reading the document, creating the calendar,
+    and writing it to a file.
+
+    Parameters
+    ----------
+    None.
 
     Returns
     -------
     None.
     """
-    dates: typing.List = read_document()
+    dates: typing.List[typing.Tuple[int, int, int, str]] = read_document()
     calendar: ics.Calendar = make_calendar(dates)
     write_calendar(calendar)
 
