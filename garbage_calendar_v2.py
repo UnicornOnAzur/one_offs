@@ -32,7 +32,7 @@ def read_document() -> typing.List[typing.Tuple[int, int, int, str]]:
     collection_dates : List of tuples containing year, month, day, and
     description.
     """
-    path: str = glob.glob(r"data/a*[0-9].pdf")[2]
+    path: str = glob.glob(r"data/a*[0-9].pdf")[0]
     try:
         reader: pypdf.PdfReader = pypdf.PdfReader(path)
     except FileNotFoundError:
