@@ -17,9 +17,9 @@ def faux_facet() -> None:
     fig1 = px.line(stocks[["GOOG", "AAPL"]])
     fig2 = px.line(stocks[["AMZN", "MSFT"]])
     # Add each trace to the corresponding subplot
-    for trace in fig1.data:
+    for trace in fig1["data"]:
         fig.add_trace(trace, row=1, col=1)
-    for trace in fig2.data:
+    for trace in fig2["data"]:
         fig.add_trace(trace, row=2, col=1)
     # Change the colors
     for idx, data in enumerate(fig.data):
