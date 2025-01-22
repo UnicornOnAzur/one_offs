@@ -4,6 +4,7 @@ This repository will contain all small(er), mainly one-off projects.
 
 ## Content
 Listed newest to oldest:
+* Making subplots with Plotly Express: can it really be done? [Story on Medium](https://medium.com/top-python-libraries/making-subplots-with-plotly-express-can-it-really-be-done-d29d4149294d), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/px_subplots.py), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/px_subplots_article.py)
 * Project a GeoDataFrame. [Story on Medium](https://medium.com/top-python-libraries/how-to-correctly-project-a-geodataframe-05b059b8a7e6)
 * Garbage Pickup Dates Calender v2: Made it more dynamic. [Story on Medium](https://medium.com/@unicornonazur/garbage-in-icalendar-out-revisited-will-it-work-for-next-year-2fd85b3355df), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/garbage_calendar_v2.py)
 * Lazy ZIPfile v2: Updated functionality. [Story on Medium](https://medium.com/pythoneers/unlazy-lazy-zipfile-2142f278b6b4), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/lazy_zipfile_v2.py)
