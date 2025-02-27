@@ -4,6 +4,8 @@ This repository will contain all small(er), mainly one-off projects.
 
 ## Content
 Listed newest to oldest:
+* Using an IIFE and query parameters with Streamlit: taking a JavaScript thing to Python. [Story on Medium](https://medium.com/pythoneers/using-an-iife-and-query-parameters-with-streamlit-taking-a-popular-thing-from-javascript-and-look-f82f50a40070), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/iife.py)
+* Clustering on Plotly mapboxes: what are the possibilities and limitations? [Story on Medium](https://medium.com/top-python-libraries/clustering-on-plotly-mapboxes-what-are-the-possibilities-and-limitations-8264c9aa6843)
 * Making subplots with Plotly Express: can it really be done? [Story on Medium](https://medium.com/top-python-libraries/making-subplots-with-plotly-express-can-it-really-be-done-d29d4149294d), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/px_subplots.py), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/px_subplots_article.py)
 * Project a GeoDataFrame. [Story on Medium](https://medium.com/top-python-libraries/how-to-correctly-project-a-geodataframe-05b059b8a7e6)
 * Garbage Pickup Dates Calender v2: Made it more dynamic. [Story on Medium](https://medium.com/@unicornonazur/garbage-in-icalendar-out-revisited-will-it-work-for-next-year-2fd85b3355df), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/garbage_calendar_v2.py)
