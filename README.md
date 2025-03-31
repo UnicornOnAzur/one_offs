@@ -4,6 +4,7 @@ This repository will contain all small(er), mainly one-off projects.
 
 ## Content
 Listed newest to oldest:
+* How to center and fit your GeoJSON on a map in GeoPandas, Plotly and Folium. [Story on Medium](https://medium.com/pythoneers/how-to-center-and-zoom-to-your-geojson-in-geopandas-plotly-and-folium-3fe3fd9c0d54), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/center_zoom_and_fit.py)
 * Using an IIFE and query parameters with Streamlit: taking a JavaScript thing to Python. [Story on Medium](https://medium.com/pythoneers/using-an-iife-and-query-parameters-with-streamlit-taking-a-popular-thing-from-javascript-and-look-f82f50a40070), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/iife.py), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/iife.js)
 * Clustering on Plotly mapboxes: what are the possibilities and limitations? [Story on Medium](https://medium.com/top-python-libraries/clustering-on-plotly-mapboxes-what-are-the-possibilities-and-limitations-8264c9aa6843)
 * Making subplots with Plotly Express: can it really be done? [Story on Medium](https://medium.com/top-python-libraries/making-subplots-with-plotly-express-can-it-really-be-done-d29d4149294d), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/px_subplots.py), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/px_subplots_article.py)
