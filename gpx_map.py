@@ -126,7 +126,7 @@ def main() -> None:
         None
     """
     st.set_page_config(page_title="Display GPX on map",
-                       page_icon=":map",
+                       page_icon=":world_map:",
                        layout="wide")
     st.title("Display GPX on a Map")
     left, right = st.columns([.2, .8], gap="small",
