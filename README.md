@@ -4,7 +4,8 @@ This repository will contain all small(er), mainly one-off projects.
 
 ## Content
 Listed newest to oldest:
-* Exporting figures. [Story on Medium](https://medium.com/top-python-libraries/output-figures-from-geopandas-plotly-and-folium-how-to-save-them-as-a-graphic-a-geojson-a-cb4c337aa7aa), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/saving_maps.py)
+* How hard can it be to display GPX on a map using Python? Not really… [Story on Medium]([Story on Medium](https://medium.com/pythoneers/how-hard-can-it-be-to-display-gpx-on-map-using-python-not-really-93a4f1617d0d), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/saving_maps.py)), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/gpx_map.py)
+* Output figures from GeoPandas, Plotly and Folium. [Story on Medium](https://medium.com/top-python-libraries/output-figures-from-geopandas-plotly-and-folium-how-to-save-them-as-a-graphic-a-geojson-a-cb4c337aa7aa), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/saving_maps.py)
 * How to center and fit your GeoJSON on a map in GeoPandas, Plotly and Folium. [Story on Medium](https://medium.com/pythoneers/how-to-center-and-zoom-to-your-geojson-in-geopandas-plotly-and-folium-3fe3fd9c0d54), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/center_zoom_and_fit.py)
 * Using an IIFE and query parameters with Streamlit: taking a JavaScript thing to Python. [Story on Medium](https://medium.com/pythoneers/using-an-iife-and-query-parameters-with-streamlit-taking-a-popular-thing-from-javascript-and-look-f82f50a40070), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/iife.py), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/iife.js)
 * Clustering on Plotly mapboxes: what are the possibilities and limitations? [Story on Medium](https://medium.com/top-python-libraries/clustering-on-plotly-mapboxes-what-are-the-possibilities-and-limitations-8264c9aa6843)
