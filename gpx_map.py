@@ -27,7 +27,8 @@ def make_map(
     Generates a folium map with GPX tracks.
 
     This function reads GPX files, extracts their coordinates, and creates a
-    map with polylines representing the tracks that is fitted to .
+    map with polylines representing the tracks that is fitted to the extent of
+    the tracks.
 
     Parameters:
         file_list : An optional list of GPX files to be plotted on the map.
@@ -39,9 +40,13 @@ def make_map(
                                           mpl.colormaps["Set1"].colors))
     map_: folium.Map = folium.Map()
     gdfs: typing.List[gpd.GeoDataFrame] = []
-    for file_name, color in zip(file_list or [], colormap):
+    for file_name, color in zip(file_list, colormap):
+        # Read the GPX file into a GeoDataFrame from the "tracks" layer and add
+        # it to the list.
         gdf: gpd.GeoDataFrame = gpd.read_file(file_name, layer="tracks")
         gdfs.append(gdf)
+        #  Create a FeatureGroup for the current file to hold its polyline and
+        # add that to the map
         lines_layer: folium.FeatureGroup = folium.FeatureGroup(name=file_name)
         folium.PolyLine(locations=gdf.geometry.get_coordinates()[["y", "x"]],
                         color=color).add_to(lines_layer)
