@@ -36,7 +36,7 @@ def make_map(
     Returns:
         The rendered HTML representation of the folium map.
     """
-    colormap: typing.List[str] = list(map(mpl.colors.rgb2hex,
+    colormap: typing.List[str] = list(map(mpl.colors.to_hex,
                                           mpl.colormaps["Set1"].colors))
     map_: folium.Map = folium.Map()
     gdfs: typing.List[gpd.GeoDataFrame] = []
