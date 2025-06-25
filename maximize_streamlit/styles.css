@@ -1,0 +1,35 @@
+/* Apply box-sizing model to include padding and border in element's total width and height */
+* {
+    box-sizing: border-box; /* Ensures consistent sizing across elements */
+    font-family: "Source Sans", sans-serif; /* Sets the default font for the document */
+}
+
+/* Define styles for columns in a grid layout */
+.column {
+    float: left; /* Allows columns to sit next to each other */
+    width: 33.33%; /* Sets each column to take up one-third of the row */
+    border: 1px solid rgba(49, 51, 63, 0.2); /* Adds a light border around each column */
+    border-radius: .5rem; /* Rounds the corners of the column */
+    padding: 15px; /* Adds space inside the column for content */
+}
+
+/* Clearfix for the row to contain floated columns */
+.row::after {
+    content: ""; /* Generates an empty content to clear floats */
+    display: table; /* Makes the clearfix work by creating a block formatting context */
+    clear: both; /* Ensures that the row contains floated children */
+}
+
+/* Styles for main heading */
+h1 {
+    font-size: 2.75rem; /* Sets the font size for the main heading */
+    font-weight: 700; /* Makes the font bold */
+}
+
+/* Styles for subheading */
+h2 {
+    font-size: 2.25rem; /* Sets the font size for the subheading */
+    font-weight: 600; /* Makes the font semi-bold */
+    letter-spacing: -0.005em; /* Adjusts the spacing between letters slightly */
+    line-height: 1.2; /* Sets the height of each line of text */
+}
