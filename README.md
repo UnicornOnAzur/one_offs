@@ -4,7 +4,10 @@ This repository will contain all small(er), mainly one-off projects.
 
 ## Content
 Listed newest to oldest:
+* 
+* Map and Reduce, or, how to apply multiple successive functions to multiple objects. [Story on Medium](https://medium.com/top-python-libraries/map-and-reduce-or-how-to-apply-multiple-successive-functions-to-multiple-objects-776845f490ef), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/map_and_reduce.py)
 * Getting the most out of your Streamlit page: maximizing the screen use. [Story on Medium](https://medium.com/pythoneers/getting-the-most-out-of-your-streamlit-page-maximizing-the-screen-use-13c2b8c5a87d), [Code](https://github.com/UnicornOnAzur/one_offs/tree/main/maximize_streamlit)
+* Always re-project the geometries of a GeoPandas GeoDataFrame successfully. [Story on Medium](https://medium.com/top-python-libraries/always-re-project-the-geometries-of-a-geopandas-geodataframe-successfully-925f3fd56801), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/always_set_crs.py)
 * Python Animation Series: Part 1: Can we get to the heart of Matplotlib Animations? [Story on Medium](https://medium.com/top-python-libraries/python-animation-series-part-1-can-we-get-to-the-heart-of-matplotlib-animations-e2c56996cdb3), [Code](https://github.com/UnicornOnAzur/python_animation/blob/main/animated_heart_shape.py)
 * Can Matplotlib Create Stunning Infographics? [Story on Medium](https://medium.com/top-python-libraries/can-matplotlib-create-stunning-infographics-f572e7e346ee), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/france_infographic.py)
 * How hard can it be to display GPX on a map using Python? Not really… [Story on Medium](https://medium.com/pythoneers/how-hard-can-it-be-to-display-gpx-on-map-using-python-not-really-93a4f1617d0d), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/gpx_map.py)
