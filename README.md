@@ -4,7 +4,7 @@ This repository will contain all small(er), mainly one-off projects.
 
 ## Content
 Listed newest to oldest:
-* Am I using the zip function in the right way? [Story on Medium](), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/how_to_use_zip.py)
+* Am I using the zip function in the right way? [Story on Medium](https://medium.com/top-python-libraries/am-i-using-the-zip-function-in-the-right-way-227b68afff77), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/how_to_use_zip.py)
 * How to Accurately Measure Distances on Earth with Python: Insights into using Haversine, Vincenty, and Law of Cosines. [Story on Medium](https://medium.com/top-python-libraries/how-to-accurately-measure-distances-on-earth-insights-into-haversine-vincenty-and-law-of-cosines-44bf442dd12c), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/calculate_distance_from_coordinates.py)
 * Map and Reduce, or, how to apply multiple successive functions to multiple objects. [Story on Medium](https://medium.com/top-python-libraries/map-and-reduce-or-how-to-apply-multiple-successive-functions-to-multiple-objects-776845f490ef), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/map_and_reduce.py)
 * Getting the most out of your Streamlit page: maximizing the screen use. [Story on Medium](https://medium.com/pythoneers/getting-the-most-out-of-your-streamlit-page-maximizing-the-screen-use-13c2b8c5a87d), [Code](https://github.com/UnicornOnAzur/one_offs/tree/main/maximize_streamlit)
