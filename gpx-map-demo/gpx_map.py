@@ -5,7 +5,6 @@ This module provides functionality to generate a folium map with GPX tracks.
 It allows users to upload GPX files, extract their coordinates, and visualize
 the tracks on an interactive map.
 """
-
 #  Standard library
 import typing
 # Third party
@@ -15,7 +14,7 @@ import matplotlib as mpl
 import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
-#
+# Constants
 UPLOADED_FILE: typing.TypeAlias =\
     typing.Optional[typing.List[st.runtime.uploaded_file_manager.UploadedFile]]
 
@@ -67,7 +66,7 @@ def main() -> None:
     download button for the generated map.
 
     Parameters:
-    None
+        None
 
     Returns:
         None
