@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-@author: UnicornOnAzur
+author: UnicornOnAzur
 
 Create a calendar using ics based on the dates extracted from a PDF file using
 pypdf. The process involves reading the document to extract a list of dates,

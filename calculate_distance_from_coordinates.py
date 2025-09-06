@@ -1,4 +1,7 @@
+# -*- coding: utf-8 -*-
 """
+author: UnicornOnAzur
+
 This module provides functions to calculate distances between geographical
 points on Earth using various formulas, including Haversine, Vincenty, and the
 Law of Cosines.
@@ -102,7 +105,7 @@ def calculate_haversine_distance(
     lat2: float,
     lon2: float,
     unit: typing.Union[str, DistanceUnit] = DistanceUnit.KM
-        ):
+        ) -> float:
     """
     Calculate the distance between two points on the Earth using the Haversine
     formula. This formula calculates the distance between two points on the
@@ -120,7 +123,7 @@ def calculate_haversine_distance(
         unit : The unit of distance (default is kilometers).
 
     Returns:
-        float: The distance between the two points in the specified unit.
+        The distance between the two points in the specified unit.
     """
     radius: float = _get_earth_radius(unit)
     distance: float = 2 * radius * math.asin(math.sqrt(
@@ -196,7 +199,7 @@ def calculate_law_of_cosines_distance(
                      math.cos(lon2_rad - lon1_rad))*radius
 
 
-def main():
+def demo() -> None:
     import haversine
     import pandas as pd
     import pygeodesy
@@ -276,4 +279,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    demo()

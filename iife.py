@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 author: UnicornOnAzur
 
@@ -11,7 +12,7 @@ def iife(func: typing.Callable) -> typing.Callable:
     """
     A decorator that immediately invokes the passed function.
 
-    Args:
+    Parameters:
         func : The function to be invoked immediately.
 
     Returns:
@@ -25,6 +26,9 @@ def func_version_1() -> int:
     """
     Function that prints a message and returns a value.
 
+    Parameters:
+        None
+    
     Returns:
         int: A value
     """
@@ -36,6 +40,9 @@ def func_version_1() -> int:
 def func_version_2() -> int:
     """
     Function that prints a message and returns a value.
+
+    Parameters:
+        None
 
     Returns:
         int: A value
@@ -52,7 +59,7 @@ def _() -> None:
 
     wnd = win32ui.GetForegroundWindow()
 
-    # # Get the selected text from the clipboard
+    # Get the selected text from the clipboard
     selected_text: str = wnd.GetWindowText()
 
     # Define the base URL

@@ -1,8 +1,9 @@
+# -*- coding: utf-8 -*-
 """
-This module generates visual comparisons between the Mercator and Equal Earth projections
-using GeoPandas and Cartopy libraries.
-
 author: UnicornOnAzur
+
+This module generates visual comparisons between the Mercator and Equal Earth
+projections using GeoPandas and Cartopy libraries.
 """
 # Third party
 import cartopy
@@ -18,7 +19,14 @@ WIDTH: int = 14
 
 def equal_earth_geopandas() -> None:
     """
-    Generates a series of maps using GeoPandas to compare different projections.
+    Generates a series of maps using GeoPandas to compare different
+    projections.
+
+    Parameters:
+        None
+
+    Returns:
+        None
     """
     world: gpd.GeoDataFrame = gpd.read_file("data/naturalearth_lowres.shp")
     #
@@ -45,6 +53,12 @@ def equal_earth_geopandas() -> None:
 def equal_earth_cartopy() -> None:
     """
     Generates a series of maps using Cartopy to compare different projections.
+
+    Parameters:
+        None
+
+    Returns:
+        None
     """
     fig: plt.Figure = plt.figure(figsize=(WIDTH, HEIGHT))
     for rect, crs in zip((121, 122),
@@ -61,6 +75,9 @@ def equal_earth_cartopy() -> None:
 def main() -> None:
     """
     Main function to execute the map generation functions.
+
+    Parameters:
+        None
 
     Returns:
         None

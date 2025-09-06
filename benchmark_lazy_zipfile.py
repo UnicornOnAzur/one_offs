@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 """
+author: UnicornOnAzur
+
 This module benchmarks the time and memory usage of reading small and large
 zip files using two different lazy loading implementations. It provides
 functions to handle zip files, perform benchmarks, and visualize the results
 using matplotlib.
-
-author:
 """
 # Standard library
 import pathlib
@@ -45,51 +46,71 @@ def handle_large_2() -> None:
     lazy_zipfile_v2.lazy_read_zip_file_contents(TEST_FILE_LARGE)[FILE_LARGE]
 
 
-def benchmark_time(iterations: int = 1) -> typing.Tuple[float,
-                                                        float,
-                                                        float,
-                                                        float]:
-    """Benchmark the time taken to read small and large zip files."""
-    result1_small = timeit.timeit("handle_small_1()",
-                                  globals=globals(),
-                                  number=iterations)
-    result2_small = timeit.timeit("handle_small_2()",
-                                  globals=globals(),
-                                  number=iterations)
-    result1_small = timeit.timeit("handle_large_1()",
-                                  globals=globals(),
-                                  number=iterations)
-    result2_large = timeit.timeit("handle_large_2()",
-                                  globals=globals(),
-                                  number=iterations)
+def benchmark_time(
+    iterations: int = 1
+        ) -> typing.Tuple[float]:
+    """
+    Benchmark the time taken to read small and large zip files.
+
+    Parameters:
+        iterations: The number of iterations for the benchmark.
+
+    Returns:
+        Time taken for small and large zip files using both lazy loading
+        implementations.
+    """
+    result1_small: float = timeit.timeit(
+        "handle_small_1()", globals=globals(), number=iterations)
+    result2_small: float = timeit.timeit(
+        "handle_small_2()", globals=globals(), number=iterations)
+    result1_small: float = timeit.timeit(
+        "handle_large_1()", globals=globals(), number=iterations)
+    result2_large: float = timeit.timeit(
+        "handle_large_2()", globals=globals(), number=iterations)
     return result1_small, result2_small, result1_small, result2_large
 
 
-def benchmark_memory(interval: float) -> typing.Tuple[typing.List[float],
-                                                      typing.List[float],
-                                                      typing.List[float],
-                                                      typing.List[float]]:
-    """Benchmark the memory usage of reading small and large zip files."""
-    memory_used1_small = memory_profiler.memory_usage((handle_small_1),
-                                                      interval=interval)
-    memory_used1_large = memory_profiler.memory_usage((handle_large_1),
-                                                      interval=interval)
-    memory_used2_small = memory_profiler.memory_usage((handle_small_2),
-                                                      interval=interval)
-    memory_used2_large = memory_profiler.memory_usage((handle_large_2),
-                                                      interval=interval)
+def benchmark_memory(
+    interval: float
+        ) -> typing.Tuple[typing.List[float]]:
+    """
+    Benchmark the memory usage of reading small and large zip files.
+
+    Parameters:
+        interval: The interval for memory profiling.
+
+    Returns:
+        Memory usage for small and large zip files using both lazy loading
+        implementations.
+    """
+    memory_used1_small: typing.List[float] = memory_profiler.memory_usage(
+        (handle_small_1), interval=interval)
+    memory_used1_large: typing.List[float] = memory_profiler.memory_usage(
+        (handle_large_1), interval=interval)
+    memory_used2_small: typing.List[float] = memory_profiler.memory_usage(
+        (handle_small_2), interval=interval)
+    memory_used2_large: typing.List[float] = memory_profiler.memory_usage(
+        (handle_large_2), interval=interval)
     return (memory_used1_small, memory_used1_large,
             memory_used2_small, memory_used2_large)
 
 
-def main():
-    """Main function to execute benchmarks and plot results."""
+def main() -> None:
+    """
+    Main function to execute benchmarks and plot results.
+
+    Parameters:
+        None
+
+    Returns:
+        None
+    """
     timed_results = []
     for it in [1, 10, 100, 1_000]:
         print(it, step := benchmark_time(it))
         timed_results.append(step)
     sized_results = benchmark_memory(.01)
-    fig, axes = plt.subplots(nrows=2)
+    _, axes = plt.subplots(nrows=2)
     x1, y1, x2, y2 = list(zip(*timed_results))
     axes[0].scatter(x1, y2, color="green", label="small")
     axes[0].scatter(x2, y2, color="red", label="large")

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-@author: UnicornOnAzur
+author: UnicornOnAzur
 
 This script dynamically imports modules, installing them if they are not
 already present. It utilizes the importlib and subprocess modules to achieve

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 author: UnicornOnAzur
 
@@ -123,7 +124,7 @@ def to_crs_eafp(
         return gdf.set_crs(DEFAULT_CRS).to_crs(crs)
 
 
-def demo():
+def demo() -> None:
     """
     Demonstrates the functionality of the MyGeoDataFrame class and the CRS
     transformation functions.

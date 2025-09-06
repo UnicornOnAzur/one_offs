@@ -1,5 +1,5 @@
 """
-@author: UnicornOnAzur
+author: UnicornOnAzur
 
 This module provides functionality to generate a folium map with GPX tracks.
 It allows users to upload GPX files, extract their coordinates, and visualize

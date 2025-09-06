@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-@author: UnicornOnAzur
+author: UnicornOnAzur
 
 This module provides functions to export geospatial figures in various formats,
 namely PNG, HTML, GeoJSON, Shapefiles, and binary files. It utilizes libraries

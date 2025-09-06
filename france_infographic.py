@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 author: UnicornOnAzur
 
@@ -86,7 +87,7 @@ def _fetch_data(
         url : The URL to fetch data from if the local file is not found.
 
     Returns:
-        bytes: The data in bytes format.
+        The data in bytes format.
     """
     try:
         with open(filename, "rb") as file:
@@ -117,8 +118,8 @@ def fetch_files() -> tuple[bytes, bytes, io.BytesIO]:
         None
 
     Returns:
-        tuple: A tuple containing GeoJSON data, Wikipedia page content, and
-        population statistics in bytes format.
+        A tuple containing GeoJSON data, Wikipedia page content, and population
+        statistics in bytes format.
     """
 
     geojson_bytes: bytes = _fetch_data(GEOJSON_FILENAME, GEOJSON_URL)
@@ -222,7 +223,8 @@ def create_gdf(
     return gdf
 
 
-def make_figure() -> tuple[plt.Figure, typing.Dict[str, mpl.axes.Axes]]:
+def make_figure(
+        ) -> tuple[plt.Figure, typing.Dict[str, mpl.axes.Axes]]:
     """
     Creates a figure with multiple subplots and inset axes.
 

@@ -1,9 +1,10 @@
+# -*- coding: utf-8 -*-
 """
+author: UnicornOnAzur
+
 This module demonstrates the use of Python's built-in functions such as zip,
 enumerate, and map. It provides various examples of how these functions can
 be utilized to manipulate iterators and visualize data using matplotlib.
-
-author: UnicornOnAzur
 """
 # Standard library
 import typing
@@ -35,6 +36,12 @@ def _stringify_iterator(
 def zip_function():
     """
     Demonstrates the use of the zip function with various arguments.
+
+    Parameters:
+        None
+
+    Returns:
+        None
     """
     a, b, c = ["1", "1", "1"], range(2, 8, 2), (3, 6, 9)
     print(_stringify_iterator("zip() with no arguments:", zip()))
@@ -43,9 +50,15 @@ def zip_function():
     print(_stringify_iterator("zip() with three arguments:", zip(a, b, c)))
 
 
-def zip_function_with_unpack_on_enumerate():
+def zip_function_with_unpack_on_enumerate() -> None:
     """
     Demonstrates the use of enumerate and zip with unpacking.
+
+    Parameters:
+        None
+
+    Returns:
+        None
     """
     data = range(20, 1, -2)
     print(_stringify_iterator("enumarate:", enumerate(data)))
@@ -64,9 +77,15 @@ def zip_function_with_unpack_on_enumerate():
                               zip(*enumerate(data))))
 
 
-def zip_on_two_lists():
+def zip_on_two_lists() -> None:
     """
     Demonstrates the use of zip with two lists and various mappings.
+
+    Parameters:
+        None
+
+    Returns:
+        None
     """
     data, index = range(20, 1, -2), range(0, 20, 2)
     print(_stringify_iterator("zip() on two lists", zip(index, data)))
@@ -83,9 +102,15 @@ def zip_on_two_lists():
                               map(list, zip(zip(index, data)))))
 
 
-def matrix_transposing():
+def matrix_transposing() -> None:
     """
     Demonstrate the similarity in transposing a matrix.
+
+    Parameters:
+        None
+
+    Returns:
+        None
     """
     row1 = [1, 2, 3]
     row2 = [4, 5, 6]
@@ -95,9 +120,15 @@ def matrix_transposing():
     print(_stringify_iterator("zip(*matrix):", zip(*matrix)))
 
 
-def plot():
+def plot() -> None:
     """
     Creates a plot demonstrating different inputs using matplotlib.
+
+    Parameters:
+        None
+
+    Returns:
+        None
     """
     fig, axes = plt.subplots(ncols=4, figsize=(7, 4),
                              subplot_kw={'xticks': [], 'yticks': []})
@@ -116,9 +147,15 @@ def plot():
     fig.savefig("output/demo.png")
 
 
-def demo():
+def demo() -> None:
     """
     Executes the demonstration functions.
+
+    Parameters:
+        None
+
+    Returns:
+        None
     """
     zip_function()
     print("="*20)
