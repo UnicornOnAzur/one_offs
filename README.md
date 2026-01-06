@@ -4,6 +4,10 @@ This repository will contain all small(er), mainly one-off projects.
 
 ## Content
 Listed newest to oldest:
+* How to prevent Excel from warbling your Cyrillic text or messing up phone numbers from your CSV? [Story on Medium](https://medium.com/top-python-libraries/how-to-prevent-excel-from-warbling-your-cyrillic-text-or-messing-up-phone-numbers-from-your-csv-2f2659850379), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/prepare_csv_for_excel.py)
+* How user-friendly is Altair really? You can create stunning plots in a straightforward, declarative manner without getting lost in tutorial hell. [Story on Medium](https://medium.com/codetodeploy/how-user-friendly-is-altair-really-246d3722e618), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/easy_plotting_with_altair.py)
+* Install a Python Package from a Repository: exploring the role of pyproject.toml and __init__.py [Story on Medium](https://medium.com/pythoneers/install-a-python-package-from-a-repository-exploring-the-role-of-pyproject-toml-and-init-py-d7deaf58f85c), [Code](https://github.com/UnicornOnAzur/geo-toolbox)
+* Create your own calendar with highlighted dates in Matplotlib [Story on Medium](https://medium.com/top-python-libraries/create-your-own-calendar-with-highlighted-dates-in-matplotlib-0a9f3b62810f), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/plot_a_calendar.py)
 * Controlling nested loops in Python like in Bash and PHP [Story on Medium](medium.com/top-python-libraries/controlling-nested-loops-in-python-like-in-bash-and-php-219a0adeccb9)
 * Equal Earth projection in maps with Python: getting on board with the ‘Correct the Map’ campaign. [Story on Medium](https://medium.com/top-python-libraries/equal-earth-projection-in-maps-with-python-getting-on-board-with-the-correct-the-map-campaign-7a33c135cb2e), [Code](https://github.com/UnicornOnAzur/one_offs/blob/main/equal_earth_projection.py)
 * How to get your low res natural earth map back in GeoPandas. [Story on Medium](https://medium.com/top-python-libraries/how-to-get-your-low-res-natural-earth-map-back-in-geopandas-80e17a1d14e4)
