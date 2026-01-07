@@ -59,11 +59,13 @@ def adding_a_prefix() -> None:
     This function demonstrates how to write CSV files with and without a
     prefix for the data, using both pandas and the standard csv library.
     """
-    prefix: str = chr(13)
+    prefix: str = chr(39) or chr(13)  # Depends on which prefix works
     data: typing.Dict[str, typing.List[str]] = {
         "Phone number": ["0612345678"],
-        "Leading zeros": ["00878"],
-        "Exponential notation": ["2E+10"]}
+        "Leading zeros": ["00123"],
+        "Long number": ["12345678901234500000"],
+        "Exponential notation": ["123E5"],
+        "Date-like": ["JAN1"]}
     df: pd.DataFrame = pd.DataFrame(data)
 
     # Pandas: write to CSV without prefix
