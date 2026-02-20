@@ -25,31 +25,29 @@ HOURS_BEFORE_MIDNIGHT: int = 4
 HOURS_AFTER_MIDNIGHT: int = 16
 CRLF: str = "\n"
 FILENAME: str = "calendar.ics"
-
-
-class InvalidInputError(Exception):
-    """Raised when user input is invalid"""
-    pass
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 def verified_path(path: str) -> str:
     """
-    Verifies if the given path is a valid directory.
+    Verifies if the given path is a valid PDF file.
 
     Parameters:
         path : The path to be verified.
 
     Returns:
-        The valid directory path.
+        The valid PDF file path.
 
     Raises:
-        argparse.ArgumentTypeError: If the path is not a valid directory.
+        argparse.ArgumentTypeError: If the path is not a valid PDF.
     """
+    if not path.endswith("pdf"):
+        raise argparse.ArgumentTypeError(f"{path} is not a PDF.")
     if os.path.isfile(os.path.join(os.getcwd(), path)):
         return path
     else:
         raise argparse.ArgumentTypeError(
-            f"{path} is not a valid path")
+            f"{path} is not a valid path.")
 
 
 def take_cli_input() -> str:
@@ -63,7 +61,8 @@ def take_cli_input() -> str:
         The file path provided by the user.
     """
     parser: argparse.ArgumentParser = argparse.ArgumentParser(
-        prog="Garbage Calendar")  # TODO: elaborate
+        description=("A command-line tool to create an ICS calendar"
+                     " from a PFD calendar"))
     parser.add_argument("-p", "--path", type=verified_path, required=True,
                         help="The path to the input file to process.")
     args: argparse.Namespace = parser.parse_args()
@@ -87,13 +86,13 @@ def _determine_spacing(lines: typing.List[str]) -> typing.List[int]:
     matches: collections.Counter = collections.Counter([
         match.start() for line in lines
         for match in re.finditer(r"\b[a-z]{2,}\b\s+\d", line)])
-    spacing: typing.List[int] = sorted([val[0]
-                                        for val in matches.most_common(4)])
+    spacing: typing.List[int] = sorted(val[0]
+                                       for val in matches.most_common(4))
     logger.debug(f"Determined spacing: {spacing}")
     return spacing
 
 
-def read_document(path) -> typing.List[typing.Tuple[int, int, int, str]]:
+def read_document(path: str) -> typing.List[typing.Tuple[int, int, int, str]]:
     """
     Extracts dates and descriptions from a PDF file to a list of dates.
 
@@ -105,15 +104,12 @@ def read_document(path) -> typing.List[typing.Tuple[int, int, int, str]]:
         description.
 
     Raises:
-        FileNotFoundError: If the PDF file is not found.
         pypdf.errors.PyPdfError: If an error occurs while reading the PDF file.
         ValueError: If the PDF does not contain valid dates.
     """
     try:
         reader: pypdf.PdfReader = pypdf.PdfReader(path)
         logger.debug(f"{reader.get_num_pages()} page was loaded.")
-    except FileNotFoundError:
-        raise FileNotFoundError("The desired input file was not found")
     except pypdf.errors.PyPdfError:
         raise pypdf.errors.PyPdfError(
             "An error occurred while reading the PDF file.")
@@ -126,7 +122,7 @@ def read_document(path) -> typing.List[typing.Tuple[int, int, int, str]]:
     if not text.strip():
         raise ValueError(
             "The PDF file is empty or does not contain valid text.")
-    year: int = int(re.findall(r"\d{4}", text)[0])
+    year: int = int(re.findall(r"2\d{3}", text)[0])
     logger.debug(f"The extracted year is: {year}.")
     lines: typing.List[str] = text.split("\n")
     date_column_found: bool = False
@@ -134,6 +130,10 @@ def read_document(path) -> typing.List[typing.Tuple[int, int, int, str]]:
     all_months: typing.List[str] = []
 
     for index, line in enumerate(lines):
+        # Skip empty lines
+        if not line:
+            logger.info(f"Skipped line {index}")
+            continue
         # Look for the first month to find the beginning of the calender
         if line.strip().lower().startswith("jan"):
             date_column_found = True
@@ -145,11 +145,8 @@ def read_document(path) -> typing.List[typing.Tuple[int, int, int, str]]:
         # Stop at the line containing the version because it is below the
         # calender section
         if line.strip().lower().startswith("ver"):
-            logger.debug(f"End found on line {index}: {line}")
+            logger.info(f"End found on line {index}: {line}")
             break
-        # Skip empty lines
-        if not line:
-            continue
 
         # Whenever the months are mentioned, repopulate the parts list
         parts: typing.List[str] = line.strip().split()
@@ -169,11 +166,19 @@ def read_document(path) -> typing.List[typing.Tuple[int, int, int, str]]:
             try:
                 _, day, description = text.strip().split()
             except ValueError as exc:
+                logger.warning(
+                    f"The string '{text}' did not contain three elements.")
                 if str(exc) == (
                         "not enough values to unpack (expected 3, got 1)"):
                     description = text.strip().split()[0]
+                    for event in collection_dates[::-1]:
+                        # Find the last added event in the same month i.e. the
+                        # same day
+                        if event[1] == all_months.index(months[step])+1:
+                            day = event[2]  # Take the day number
+                            break
                 else:
-                    continue
+                    raise exc
             logger.debug((f"Extracted information from line {index}:"
                           f" {year} {step} {day} {description}"))
             collection_dates.append((year,
@@ -202,12 +207,12 @@ def make_calendar(pickup_dates: typing.List[typing.Tuple[int, int, int, str]]
     # For every date add an event to the calendar
     for (year, month, day, description) in pickup_dates:
         event_date: datetime.datetime = datetime.datetime(year, month, day)
-        event: ics.Event = ics.Event()
-        event.begin = event_date -\
-            datetime.timedelta(hours=HOURS_BEFORE_MIDNIGHT)
-        event.end = event_date +\
-            datetime.timedelta(hours=HOURS_AFTER_MIDNIGHT)
-        event.name = description
+        event: ics.Event = ics.Event(
+            name=description,
+            begin=event_date - datetime.timedelta(hours=HOURS_BEFORE_MIDNIGHT),
+            end=event_date + datetime.timedelta(hours=HOURS_AFTER_MIDNIGHT),
+            uid=f"UnicornOnAzur@{year}_{month}_{day}_{description}"
+            )
         calendar.events.add(event)
     else:
         logger.info(f"Calendar created with {len(calendar.events)} events.")
@@ -224,8 +229,8 @@ def write_calendar(calendar: ics.Calendar) -> None:
     Returns:
         None.
     """
+    timestamp: str = datetime.datetime.now().strftime("%Y%m%dT%H%M%SZ")
     with open(FILENAME, mode="w", encoding="utf-8") as file:
-        timestamp: str = datetime.datetime.now().strftime("%Y%m%dT%H%M%SZ")
         for line in calendar.serialize_iter():
             # Replace the current CRLF sequence with a new one
             file.write(line.replace("\r\n", CRLF))
@@ -249,19 +254,15 @@ def main() -> None:
     Returns:
         None
     """
-    # TODO: remark
     path = take_cli_input()
-    # TODO: remark
     dates: typing.List[typing.Tuple[int, int, int, str]] = read_document(path)
     calendar: ics.Calendar = make_calendar(dates)
     write_calendar(calendar)
 
 
 if __name__ == "__main__":
-    """
-    """
-    logger: logging.Logger = logging.getLogger(__name__,)
     logging.basicConfig(
-        filename='log.log', filemode="w", level=logging.DEBUG,
-        format="%(funcName)s %(lineno)d | %(message)s")
+        filename='log.log', filemode="w",
+        format="%(levelname)-8s|%(funcName)-18s|%(lineno)3d| %(message)s",
+        level=logging.INFO, encoding="utf-8")
     main()
