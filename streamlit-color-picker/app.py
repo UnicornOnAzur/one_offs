@@ -8,6 +8,7 @@ and manage user interactions through a Streamlit interface.
 author:
 """
 # Standard library
+import glob
 import pathlib
 import toml
 import typing
@@ -15,7 +16,7 @@ import typing
 import pandas as pd
 import streamlit as st
 # Constants
-TOML_FILE_PATH: pathlib.Path = ".streamlit/config.toml"
+TOML_FILE_PATH: pathlib.Path = glob.glob("**/*streamlit-color-picker*/.streamlit/*.toml", recursive=True)
 TXT_FILE_PATH: pathlib.Path = "default.txt"
 HEADER: str = "theme"
 
@@ -42,8 +43,6 @@ def init() -> None:
     global COLOR_FIELDS
     COLOR_FIELDS = []
     st.set_page_config(layout="wide")
-    import glob
-    st.write(glob.glob("**/*streamlit-color-picker*/.streamlit/*.toml", recursive=True))
     theme: typing.Dict[str, str] = read_toml_to_dict()
     for key, value in theme.items():
         st.session_state[key] = value
