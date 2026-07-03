@@ -24,6 +24,12 @@ TXT_FILE_PATH: pathlib.Path = glob.glob(f"{FOLDER_PATH}default.txt",
 HEADER: str = "theme"
 
 
+def _download_button(column: st._DeltaGenerator):
+    return column.download_button(
+        "Download button", data=open(TOML_FILE_PATH, "rb"),
+        file_name="config.toml")
+
+
 def read_toml_to_dict() -> typing.Dict[str, str]:
     with open(TOML_FILE_PATH) as file:
         return toml.load(file)[HEADER]
@@ -85,7 +91,7 @@ def main() -> None:
     sc2.button("Secondary button", type="secondary")
     sc3.button("Tertiary button", type="tertiary")
     sc1.link_button("Link button", url="")
-    sc2.download_button("Download button", data="")
+    _download_button(sc2)
     sc3.file_uploader("Uploader")
     sidebar.multiselect("Multiselect", options=COLOR_FIELDS,
                         default=COLOR_FIELDS[-1])
@@ -119,7 +125,7 @@ def main() -> None:
     rc2.button("Secondary button", type="secondary")
     rc3.button("Tertiary button", type="tertiary")
     rc1.link_button("Link button", url="")
-    rc2.download_button("Download button", data="")
+    _download_button(rc2)
     rc3.file_uploader("Uploader")
     right.multiselect("Multiselect", options=COLOR_FIELDS,
                       default=COLOR_FIELDS[-1])
