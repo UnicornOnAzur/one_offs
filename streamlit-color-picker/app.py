@@ -42,6 +42,8 @@ def init() -> None:
     global COLOR_FIELDS
     COLOR_FIELDS = []
     st.set_page_config(layout="wide")
+    import glob
+    st.write(glob.glob("*"))
     theme: typing.Dict[str, str] = read_toml_to_dict()
     for key, value in theme.items():
         st.session_state[key] = value
