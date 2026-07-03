@@ -16,8 +16,11 @@ import typing
 import pandas as pd
 import streamlit as st
 # Constants
-TOML_FILE_PATH: pathlib.Path = glob.glob("**/*streamlit-color-picker*/.streamlit/*.toml", recursive=True)[0]
-TXT_FILE_PATH: pathlib.Path = glob.glob("**/*streamlit-color-picker*/default.txt", recursive=True)[0]
+FOLDER_PATH: str = "**/*streamlit-color-picker*/"
+TOML_FILE_PATH: pathlib.Path = glob.glob(f"{FOLDER_PATH}.streamlit/*.toml",
+                                         recursive=True)[0]
+TXT_FILE_PATH: pathlib.Path = glob.glob(f"{FOLDER_PATH}default.txt",
+                                        recursive=True)[0]
 HEADER: str = "theme"
 
 
