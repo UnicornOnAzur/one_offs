@@ -79,6 +79,24 @@ def color_cells_by_value(values: pd.Series) -> typing.List[str]:
 def main() -> None:
     sidebar = st.sidebar
     sidebar.header("Sidebar")
+    sc1, sc2, sc3 = sidebar.columns(3)
+    sc1.button("Reset toml file", type="primary",
+               on_click=reset_toml_file_to_default)
+    sc2.button("Secondary button", type="secondary")
+    sc3.button("Tertiary button", type="tertiary")
+    sc1.link_button("Link button", url="")
+    sc2.download_button("Download button", data="")
+    sc3.file_uploader("Uploader")
+    sidebar.multiselect("Multiselect", options=COLOR_FIELDS,
+                        default=COLOR_FIELDS[-1])
+    container_sidebar = sidebar.container(border=True)
+    container_sidebar.subheader("Inside a container")
+    container_sidebar.markdown(("This is Markdown test. "
+                                "This is `inline code` in Markdown. "
+                                "This is a link to the [Streamlit docs]()."))
+    container_sidebar.code("for i in range(9): print(i)")
+    sidebar.dataframe(data=pd.DataFrame(["value"], columns=["Header"]))
+    #
     left, right = st.columns(2)
     # LEFT: changing colors and displaying the current value
     left.header("Change a color")
