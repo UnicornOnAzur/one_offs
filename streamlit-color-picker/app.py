@@ -43,7 +43,7 @@ def init() -> None:
     COLOR_FIELDS = []
     st.set_page_config(layout="wide")
     import glob
-    st.write(glob.glob("*"))
+    st.write(glob.glob("**/*streamlit-color-picker*/.streamlit/*.toml", recursive=True))
     theme: typing.Dict[str, str] = read_toml_to_dict()
     for key, value in theme.items():
         st.session_state[key] = value
