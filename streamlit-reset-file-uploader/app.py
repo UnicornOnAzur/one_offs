@@ -3,14 +3,16 @@ import typing
 # Third party
 import streamlit as st
 
+# Initialize session state for unique key if not already present
 if "unique_key" not in st.session_state:
     st.session_state.unique_key = 0
-
+# Set the layout of the Streamlit page
 st.set_page_config(layout="wide")
 st.title("Demonstrating resetting the file uploader")
 left, right = st.columns(2)
+# Display the session state in the left column
 left.json(st.session_state)
-#
+# Display the three file uploaders
 right.header("Single file allowed")
 right.subheader("Using rerun")
 uploaded_file: typing.Optional[
