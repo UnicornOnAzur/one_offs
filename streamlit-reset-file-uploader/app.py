@@ -3,11 +3,16 @@ import typing
 # Third party
 import streamlit as st
 
+
+def process_file():
+    st.toast("Received your file")
+    st.session_state.unique_key += 1
+
+
 # Initialize session state for unique key if not already present
 if "unique_key" not in st.session_state:
     st.session_state.unique_key = 0
 # Set the layout of the Streamlit page
-st.set_page_config(layout="wide")
 st.title("Demonstrating resetting the file uploader")
 left, right = st.columns(2)
 # Display the session state in the left column
@@ -28,8 +33,12 @@ uploaded_file_1: typing.Optional[
             )
 if uploaded_file_1 is not None:
     st.session_state.unique_key += 1
-right.button("Click", key="0")
+right.button("Click")
+right.subheader("Using 'on_change'")
+right.file_uploader(
+    "Upload a file", key=f"uploader_key2_{st.session_state.unique_key}",
+    on_change=process_file)
 right.subheader("Within a st.form")
-form = right.form("form1", clear_on_submit=True)
+form: st._DeltaGenerator = right.form("form1", clear_on_submit=True)
 form.file_uploader("Upload a file", key="uploader_in_form1")
 form.form_submit_button()
