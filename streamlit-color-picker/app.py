@@ -20,25 +20,24 @@ import streamlit as st
 import streamlit.runtime.scriptrunner_utils.script_run_context as run_context
 import toml
 # Constants
-FOLDER_PATH: str = ""
-TOML_FILE_PATH: pathlib.Path = glob.glob(f"{FOLDER_PATH}.streamlit/*.toml",
-                                         recursive=True)[0]
-TXT_FILE_PATH: pathlib.Path = glob.glob(f"{FOLDER_PATH}default.txt",
-                                        recursive=True)[0]
+# FOLDER_PATH: str = ""
+# TOML_FILE_PATH: pathlib.Path = glob.glob(f"{FOLDER_PATH}.streamlit/*.toml",
+#                                          recursive=True)[0]
+# TXT_FILE_PATH: pathlib.Path = glob.glob(f"{FOLDER_PATH}default.txt",
+#                                         recursive=True)[0]
 HEADER: str = "theme"
 
 
-@lambda _: _
+@lambda _: _()
 def determine_path() -> None:
     global FOLDER_PATH, TOML_FILE_PATH, TXT_FILE_PATH
     context: run_context.ScriptRunContext = run_context.get_script_run_ctx()
     current_url: str = context.context_info.url
-    if "localhost" not in current_url:
-        FOLDER_PATH = "**/*streamlit-color-picker*/"
-        TOML_FILE_PATH = glob.glob(f"{FOLDER_PATH}.streamlit/*.toml",
-                                   recursive=True)[0]
-        TXT_FILE_PATH = glob.glob(f"{FOLDER_PATH}default.txt",
-                                  recursive=True)[0]
+    FOLDER_PATH = "" if "localhost" in current_url else "**/*streamlit-color-picker*/"
+    TOML_FILE_PATH = glob.glob(f"{FOLDER_PATH}.streamlit/*.toml",
+                                recursive=True)[0]
+    TXT_FILE_PATH = glob.glob(f"{FOLDER_PATH}default.txt",
+                                recursive=True)[0]
 
 
 def set_place_of_a_widget_on_a_row_of(number_of_columns: int = 2
