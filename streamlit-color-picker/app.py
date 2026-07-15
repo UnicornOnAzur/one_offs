@@ -5,12 +5,11 @@ This module provides functionality to read and write theme colors from
 a TOML configuration file, reset the configuration to default values,
 and manage user interactions through a Streamlit interface.
 
-author:
+author: UnicornOnAzur
 """
 # Standard library
 import functools
 import glob
-import pathlib
 import tomllib
 import types
 import typing
@@ -20,24 +19,23 @@ import streamlit as st
 import streamlit.runtime.scriptrunner_utils.script_run_context as run_context
 import toml
 # Constants
-# FOLDER_PATH: str = ""
-# TOML_FILE_PATH: pathlib.Path = glob.glob(f"{FOLDER_PATH}.streamlit/*.toml",
-#                                          recursive=True)[0]
-# TXT_FILE_PATH: pathlib.Path = glob.glob(f"{FOLDER_PATH}default.txt",
-#                                         recursive=True)[0]
 HEADER: str = "theme"
 
 
 @lambda _: _()
 def determine_path() -> None:
+    """
+    Determines the file paths for TOML and TXT files based on the current URL.
+    """
     global FOLDER_PATH, TOML_FILE_PATH, TXT_FILE_PATH
     context: run_context.ScriptRunContext = run_context.get_script_run_ctx()
     current_url: str = context.context_info.url
-    FOLDER_PATH = "" if "localhost" in current_url else "**/*streamlit-color-picker*/"
-    TOML_FILE_PATH = glob.glob(f"{FOLDER_PATH}.streamlit/*.toml",
-                                recursive=True)[0]
-    TXT_FILE_PATH = glob.glob(f"{FOLDER_PATH}default.txt",
-                                recursive=True)[0]
+    FOLDER_PATH = "" if "localhost" in current_url else\
+        "**/*streamlit-color-picker*/"
+    TOML_FILE_PATH = next(glob.iglob(f"{FOLDER_PATH}.streamlit/*.toml",
+                                     recursive=True))
+    TXT_FILE_PATH = next(glob.iglob(f"{FOLDER_PATH}default.txt",
+                                    recursive=True))
 
 
 def set_place_of_a_widget_on_a_row_of(number_of_columns: int = 2
@@ -93,7 +91,7 @@ def set_place_of_a_widget_on_a_row_of(number_of_columns: int = 2
 
 
 @set_place_of_a_widget_on_a_row_of(3)
-def _color_picker(
+def create_color_picker(
         field_name: str, column: st._DeltaGenerator
         ) -> st._DeltaGenerator:
     """
@@ -111,13 +109,13 @@ def _color_picker(
         key=field_name)
 
 
-def _download_button(column: st._DeltaGenerator) -> bool:
+def create_download_button(column: st._DeltaGenerator) -> bool:
     with open(TOML_FILE_PATH, "rb") as file:
         return column.download_button("Download button", data=file,
                                       file_name="config.toml")
 
 
-def _uploader(column: st._DeltaGenerator, name: str) -> None:
+def create_file_uploader(column: st._DeltaGenerator, name: str) -> None:
     uploaded_file: typing.Optional[
         st.runtime.uploaded_file_manager.UploadedFile] = column.file_uploader(
         "Upload a TOML file.", type=".toml",
@@ -168,45 +166,24 @@ def color_cells_by_value(values: pd.Series) -> typing.List[str]:
 
 def main() -> None:
     """
+    Main function to run the Streamlit application.
     """
-    if "uploader_key" not in st.session_state:
-        st.session_state["uploader_key"] = 0
+    # Create variables for the app
     global COLOR_FIELDS
     COLOR_FIELDS = []
     st.set_page_config(layout="wide")
     theme: typing.Dict[str, str] = read_toml_to_dict()
+    if "uploader_key" not in st.session_state:
+        st.session_state["uploader_key"] = 0
     for key, value in theme.items():
         st.session_state[key] = value
         COLOR_FIELDS.append(key)
-    for field_name in COLOR_FIELDS:
-        st.session_state[f"{field_name}_1"] = st.session_state[field_name]
-
-    sidebar = st.sidebar
-    sidebar.header("Sidebar")
-    sc1, sc2, sc3 = sidebar.columns(3)
-    sc1.button("Reset toml file", type="primary",
-               on_click=reset_toml_file_to_default)
-    sc2.button("Secondary button", type="secondary")
-    sc3.button("Tertiary button", type="tertiary")
-    sc1.link_button("Link button", url="")
-    _download_button(sc2)
-    _uploader(sc3, "sc3")
-    sidebar.multiselect("Multiselect", options=COLOR_FIELDS,
-                        default=COLOR_FIELDS[-1])
-    container_sidebar = sidebar.container(border=True)
-    container_sidebar.subheader("Inside a container")
-    container_sidebar.markdown(("This is Markdown test. "
-                                "This is `inline code` in Markdown. "
-                                "This is a link to the [Streamlit docs]()."))
-    container_sidebar.code("for i in range(9): print(i)")
-    sidebar.dataframe(data=pd.DataFrame(["value"], columns=["Header"]))
-    #
     left, right = st.columns(2)
     # LEFT: changing colors and displaying the current value
     left.header("Change a color")
     form = left.form("form")
     for field in COLOR_FIELDS:
-        _color_picker(field, form)
+        create_color_picker(field, form)
     form.form_submit_button(on_click=write_session_state_to_toml)
     left.subheader("The current colors")
     left.table(pd.DataFrame().from_dict(read_toml_to_dict(), orient="index"
@@ -221,8 +198,8 @@ def main() -> None:
     rc2.button("Secondary button", type="secondary")
     rc3.button("Tertiary button", type="tertiary")
     rc1.link_button("Link button", url="")
-    _download_button(rc2)
-    _uploader(rc3, "rc3")
+    create_download_button(rc2)
+    create_file_uploader(rc3, "rc3")
     right.multiselect("Multiselect", options=COLOR_FIELDS,
                       default=COLOR_FIELDS[-1])
     container = right.container(border=True)
@@ -232,6 +209,26 @@ def main() -> None:
                         "This is a link to the [Streamlit docs]()."))
     container.code("for i in range(9): print(i)")
     right.dataframe(data=pd.DataFrame(["value"], columns=["Header"]))
+    # SIDEBAR: Mimick the right panel
+    sidebar = st.sidebar
+    sidebar.header("Sidebar")
+    sc1, sc2, sc3 = sidebar.columns(3)
+    sc1.button("Reset toml file", type="primary",
+               on_click=reset_toml_file_to_default)
+    sc2.button("Secondary button", type="secondary")
+    sc3.button("Tertiary button", type="tertiary")
+    sc1.link_button("Link button", url="")
+    create_download_button(sc2)
+    create_file_uploader(sc3, "sc3")
+    sidebar.multiselect("Multiselect", options=COLOR_FIELDS,
+                        default=COLOR_FIELDS[-1])
+    container_sidebar = sidebar.container(border=True)
+    container_sidebar.subheader("Inside a container")
+    container_sidebar.markdown(("This is Markdown test. "
+                                "This is `inline code` in Markdown. "
+                                "This is a link to the [Streamlit docs]()."))
+    container_sidebar.code("for i in range(9): print(i)")
+    sidebar.dataframe(data=pd.DataFrame(["value"], columns=["Header"]))
 
 
 if __name__ == "__main__":
