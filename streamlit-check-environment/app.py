@@ -24,7 +24,7 @@ with left.container(border=True):
     st.space()
     st.subheader("Runtime")
     st.write(st.runtime.Runtime.instance()._main_script_path)
-    # st.write(st.runtime.Runtime.instance().__dict__)
+    st.write(st.runtime.Runtime.instance().__dict__)
     # st.write(dir(st.runtime.Runtime.instance()))
 right.header("Other approaches")
 with right.container(border=True):
