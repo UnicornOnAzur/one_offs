@@ -30,6 +30,7 @@ with right.container(border=True):
     st.space()
     st.subheader("Platform")
     st.write(platform.processor())
+    st.write(platform.processor() is None)
     st.space()
     st.subheader("Threading")
     thread = threading.current_thread()
