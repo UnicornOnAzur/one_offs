@@ -27,6 +27,7 @@ right.header("Other approaches")
 with right.container(border=True):
     st.subheader("OS")
     st.write(os.getenv('USER'))
+    st.write(os.getenv('USER' ) != 'appuser')
     st.space()
     st.subheader("Platform")
     st.write(platform.processor())
