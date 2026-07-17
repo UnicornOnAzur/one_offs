@@ -23,9 +23,7 @@ with left.container(border=True):
     st.write()
     st.space()
     st.subheader("Runtime")
-    st.write(st.runtime.Runtime.instance()._main_script_path)
-    st.write(st.runtime.Runtime.instance().__dict__)
-    # st.write(dir(st.runtime.Runtime.instance()))
+    st.write(st.runtime.Runtime.instance()._main_script_path.startswith("/mount/"))
 right.header("Other approaches")
 with right.container(border=True):
     st.subheader("OS")
