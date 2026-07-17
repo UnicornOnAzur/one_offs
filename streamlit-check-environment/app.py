@@ -36,3 +36,4 @@ with right.container(border=True):
     st.subheader("Threading")
     thread = threading.current_thread()
     st.write(type(thread).__module__)
+    st.write(type(thread).__module__.startswith('streamlit.'))
