@@ -30,6 +30,7 @@ right.header("Other approaches")
 with right.container(border=True):
     st.subheader("OS")
     st.write(os.getenv("USER"))
+    st.write(os.getenv("STREAMLIT_SERVER_RUN_ON_SAVE"))
     st.write(os.getenv("STREAMLIT_SERVER_ALLOW_RUN_ON_SAVE"))
     st.write(os.getenv("USER") != "appuser")
     st.space()
