@@ -1,8 +1,8 @@
-
+# Standard library
 import os
 import platform
 import threading
-
+# Third party
 import streamlit as st
 import streamlit.runtime as runtime
 import streamlit.runtime.scriptrunner_utils.script_run_context as run_context
@@ -37,6 +37,5 @@ with right.container(border=True):
     st.write(platform.processor() != "")
     st.space()
     st.subheader("Threading")
-    thread = threading.current_thread()
-    st.write(thread.name)
-    st.write(type(thread).__module__.startswith("streamlit."))
+    st.write(threading.current_thread().name)
+    st.write(threading.current_thread().name.startswith("ScriptRunner"))
