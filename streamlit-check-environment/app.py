@@ -4,6 +4,7 @@ import platform
 import threading
 
 import streamlit as st
+import streamlit.runtime as runtime
 import streamlit.runtime.scriptrunner_utils.script_run_context as run_context
 
 st.set_page_config(layout="wide")
@@ -20,14 +21,16 @@ with left.container(border=True):
     st.write("http://localhost" in context.context_info.url)
     st.space()
     st.subheader("AppSession")
-    st.write()
     st.space()
     st.subheader("Runtime")
-    st.write(st.runtime.Runtime.instance()._main_script_path.startswith("/mount/"))
+    runtime_instance = runtime.Runtime.instance()
+    st.write(runtime_instance._main_script_path)
+    st.write(not runtime_instance._main_script_path.startswith("/mount/"))
 right.header("Other approaches")
 with right.container(border=True):
     st.subheader("OS")
     st.write(os.getenv("USER"))
+    st.write(os.getenv("STREAMLIT_SERVER_ALLOW_RUN_ON_SAVE"))
     st.write(os.getenv("USER") != "appuser")
     st.space()
     st.subheader("Platform")
