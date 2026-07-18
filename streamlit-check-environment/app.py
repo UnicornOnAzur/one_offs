@@ -33,7 +33,7 @@ with right.container(border=True):
     st.write(os.getenv("USER") != "appuser")
     st.space()
     st.subheader("Platform")
-    st.write(f"'{platform.processor()}'")
+    st.write(f"'{platform.uname()}'")
     st.write(platform.processor() != "")
     st.space()
     st.subheader("Threading")
