@@ -1,9 +1,8 @@
 """
-Module for demonstrating theme colors in a Streamlit application.
-
-This module provides functionality to read and write theme colors from
-a TOML configuration file, reset the configuration to default values,
-and manage user interactions through a Streamlit interface.
+Module for demonstrating theme colors in a Streamlit application. This module
+provides functionality to read and write theme colors from a TOML
+configuration file, reset the configuration to default values, and manage user
+interactions through a Streamlit interface.
 
 author: UnicornOnAzur
 """
@@ -16,31 +15,72 @@ import typing
 # Third party
 import pandas as pd
 import streamlit as st
-import streamlit.runtime.scriptrunner_utils.script_run_context as run_context
 import toml
 # Constants
-HEADER: str = "theme"
+THEME_HEADER: str = "theme"
+StreamlitObject = st._DeltaGenerator
+WidgetFunctionArgs: typing.TypeAlias = typing.Tuple[str, StreamlitObject | types.ModuleType]  # noqa: E501
+DecoratedFunction: typing.TypeAlias = typing.Callable[..., StreamlitObject]
+
+
+###############################################################################
+# General functions                                                           #
+###############################################################################
+def is_app_running_locally() -> bool:
+    """
+    This function checks the current URL from the script run context to
+    ascertain if it contains 'localhost', indicating a local run.
+
+    Parameters:
+        None
+
+    Returns:
+        True if the application is running locally, False otherwise.
+    """
+    return st.context.url.startswith("http://localhost")
 
 
 @lambda _: _()
-def determine_path() -> None:
+@st.cache_data()
+def determine_path() -> typing.Tuple[str]:
     """
     Determines the file paths for TOML and TXT files based on the current URL.
+
+    Parameters:
+        None
+
+    Returns:
+        The file paths for the TOML and TEXT file.
     """
-    global FOLDER_PATH, TOML_FILE_PATH, TXT_FILE_PATH
-    context: run_context.ScriptRunContext = run_context.get_script_run_ctx()
-    current_url: str = context.context_info.url
-    FOLDER_PATH = "" if "localhost" in current_url else\
+    folder_path: str = "" if is_app_running_locally() else\
         "**/*streamlit-color-picker*/"
-    TOML_FILE_PATH = next(glob.iglob(f"{FOLDER_PATH}.streamlit/*.toml",
-                                     recursive=True))
-    TXT_FILE_PATH = next(glob.iglob(f"{FOLDER_PATH}default.txt",
-                                    recursive=True))
+    toml_file_path: str = next(glob.iglob(f"{folder_path}.streamlit/*.toml",
+                                          recursive=True))
+    text_file_path: str = next(glob.iglob(f"{folder_path}default.txt",
+                                          recursive=True))
+    return toml_file_path, text_file_path
 
 
-def set_place_of_a_widget_on_a_row_of(number_of_columns: int = 2
-                                      ) -> typing.Callable[...,
-                                                           st._DeltaGenerator]:
+TOML_FILE_PATH, TXT_FILE_PATH = determine_path
+
+
+def color_cells_by_value(values: pd.Series) -> typing.List[str]:
+    """
+    Creates CSS background color styles for cells based on their values.
+
+    Parameters:
+        values: A list of color values.
+
+    Returns:
+        A list of CSS style strings for background colors.
+    """
+    return [f"background-color: {value}" for value in values]
+
+
+###############################################################################
+# Streamlit widget related functions                                          #
+###############################################################################
+def set_widget_in_columns(number_of_columns: int = 2) -> DecoratedFunction:
     """
     A decorator to arrange the widget in a specified number of columns.
 
@@ -50,9 +90,8 @@ def set_place_of_a_widget_on_a_row_of(number_of_columns: int = 2
     Returns:
         A wrapper function that manages column placement.
     """
-    def decorator(func: typing.Callable[
-        [str, st._DeltaGenerator | types.ModuleType], st._DeltaGenerator]
-              ) -> typing.Callable[..., st._DeltaGenerator]:
+    def decorator(func: typing.Callable[[WidgetFunctionArgs], StreamlitObject]
+                  ) -> DecoratedFunction:
         """
         Wraps the original function to manage column placement. Initializes
         wrapper.count and wrapper.columns to maintain state.
@@ -64,9 +103,7 @@ def set_place_of_a_widget_on_a_row_of(number_of_columns: int = 2
             The wrapper function that manages column placement.
         """
         @functools.wraps(func)
-        def wrapper(
-                *args: typing.Tuple[str, st._DeltaGenerator | types.ModuleType]
-                ) -> st._DeltaGenerator:
+        def wrapper(*args: WidgetFunctionArgs) -> StreamlitObject:
             """
             Manages the placement of widgets in columns. Uses wrapper.count and
             wrapper.columns to maintain state.
@@ -75,25 +112,24 @@ def set_place_of_a_widget_on_a_row_of(number_of_columns: int = 2
                 *args : The field name and page segment.
 
             Returns:
-                st._DeltaGenerator: The widget created by the inner function.
+                The widget created by the inner function.
             """
             name, page_segment = args
-            if wrapper.count % number_of_columns == 0:
+            if not wrapper.columns:
                 wrapper.columns = page_segment.columns(number_of_columns)
-            widget: st._DeltaGenerator = func(
+            widget: StreamlitObject = func(
                 name, wrapper.columns[wrapper.count % number_of_columns])
             wrapper.count += 1
             return widget
         wrapper.count = 0
-        wrapper.columns = []  # typing.List[st._DeltaGenerator]
+        wrapper.columns = []  # typing.List[StreamlitObject]
         return wrapper
     return decorator
 
 
-@set_place_of_a_widget_on_a_row_of(3)
-def create_color_picker(
-        field_name: str, column: st._DeltaGenerator
-        ) -> st._DeltaGenerator:
+@set_widget_in_columns(3)
+def create_color_picker(field_name: str, column: StreamlitObject
+                        ) -> StreamlitObject:
     """
     Creates a color picker widget in the specified column.
 
@@ -104,69 +140,167 @@ def create_color_picker(
     Returns:
         The color picker widget.
     """
-    return column.color_picker(
-        field_name, value=st.session_state.get(field_name, None),
-        key=field_name)
+    return column.color_picker(field_name, key=field_name)
 
 
-def create_download_button(column: st._DeltaGenerator) -> bool:
+def create_download_button(column: StreamlitObject) -> None:
+    """
+    Creates a download button in the specified column for downloading a TOML
+    configuration file.
+
+
+    Parameters:
+        column: The column where the color picker will be placed.
+
+    Returns:
+        None
+    """
     with open(TOML_FILE_PATH, "rb") as file:
-        return column.download_button("Download button", data=file,
-                                      file_name="config.toml")
+        column.download_button("Download button", data=file,
+                               file_name="config.toml")
 
 
-def create_file_uploader(column: st._DeltaGenerator, name: str) -> None:
+def create_file_uploader(column: StreamlitObject, name: str) -> None:
+    """
+    Creates a file uploader in the specified column for uploading a TOML file.
+
+    Parameters:
+        column: The column where the uploader will be placed.
+        name: The unique name of the uploader.
+
+    Returns:
+        None
+    """
     uploaded_file: typing.Optional[
         st.runtime.uploaded_file_manager.UploadedFile] = column.file_uploader(
         "Upload a TOML file.", type=".toml",
         key=f"uploader_{name}_{st.session_state.uploader_key}")
     if uploaded_file is not None:
         with open(TOML_FILE_PATH, "w") as file:
-            toml.dump(tomllib.load(uploaded_file), file)
+            toml_input = tomllib.load(uploaded_file)
+            toml.dump(toml_input, file)
         st.session_state.uploader_key += 1
 
 
+def create_page_segment(segment: StreamlitObject, header_text: str) -> None:
+    """
+    Creates a segmented page layout in Streamlit with various interactive
+    components.
+
+    Parameters:
+    segment : The Streamlit segment object to which components will be added.
+    header_text : The text to be displayed as the header of the segment.
+    """
+    segment.header(header_text)
+    # Create three columns within the segment
+    col1: StreamlitObject
+    col2: StreamlitObject
+    col3: StreamlitObject
+    col1, col2, col3 = segment.columns(3)
+    # Left column
+    col1.button("Reset toml file", type="primary",
+                on_click=reset_toml_file_to_default)
+    col1.link_button("Link button", url="")
+    col1.success("Success!")
+    col1.badge("Badge", color="primary")  # To show the use of primaryColor
+    col1.exception(ValueError())
+    # Middle column
+    col2.button("Secondary button", type="secondary")
+    create_download_button(col2)
+    col2.warning("Warning!")
+    col2.info("Info!")
+    col2.toggle("Toggle")
+    # Right column
+    col3.button("Tertiary button", type="tertiary")
+    create_file_uploader(col3, header_text)
+    col3.error("Error!")
+    col3.metric("Metric", value=1)
+    # Expander
+    with segment.expander(label="Expander", expanded=True):
+        tab1, tab2 = st.tabs(["tab1", "tab2"])
+        tab1.pills(label="Pills", options=COLOR_FIELDS)
+        tab2.help(print)
+    # Multiselect
+    segment.multiselect("Multiselect", options=COLOR_FIELDS,
+                        default=COLOR_FIELDS[:3])
+    # Container
+    container: StreamlitObject = segment.container(border=True)
+    container.subheader("Inside a container")
+    container.markdown(("This is Markdown test. "
+                        "This is `inline code` in Markdown. "
+                        "This is a link to the [Streamlit docs]()."))
+    container.code("for i in range(9): print(i)")
+    # Bottom
+    segment.dataframe(data=pd.DataFrame(["value"], columns=["Header"]))
+    segment.caption("Caption")
+
+
+###############################################################################
+# TOML related functions                                                      #
+###############################################################################
 def read_toml_to_dict() -> typing.Dict[str, str]:
     """
     Read the TOML file to a dictionary and read the keys within the 'theme'
     header.
+
+    Parameters:
+        None
+
+    Returns:
+        A dictionary containing the keys and values under the theme header.
+
+    Raises:
+        KeyError: If the specified theme header is missing in the TOML file.
     """
     with open(TOML_FILE_PATH, "rb") as file:
-        return tomllib.load(file)[HEADER]
+        try:
+            return tomllib.load(file)[THEME_HEADER]
+        except KeyError:
+            st.toast(f"TOML is missing a {THEME_HEADER} header")
+            reset_toml_file_to_default()
 
 
 def write_session_state_to_toml() -> None:
     """
     Creates a TOML file by creating a dictionary from the session state and add
     a header.
+
+    Parameters:
+        None
+
+    Returns:
+        None
     """
     with open(TOML_FILE_PATH, "w") as file:
-        toml.dump({HEADER:
+        toml.dump({THEME_HEADER:
                    {key: st.session_state[key] for key in COLOR_FIELDS}}, file)
 
 
 def reset_toml_file_to_default() -> None:
+    """
+    Resets the TOML file to its default state by copying content from a text
+    file.
+
+    Parameters:
+        None
+
+    Returns:
+        None
+    """
     with (open(TXT_FILE_PATH) as text_file,
           open(TOML_FILE_PATH, "w") as toml_file):
         toml_file.write(text_file.read())
 
 
-def color_cells_by_value(values: pd.Series) -> typing.List[str]:
-    """
-    Applies background color styles to cells based on their values.
-
-    Parameters:
-        values: A list of color values.
-
-    Returns:
-        A list of CSS style strings for background colors.
-    """
-    return [f"background-color: {value}" for value in values]
-
-
+###############################################################################
+# MAIN loop                                                                   #
+###############################################################################
 def main() -> None:
     """
     Main function to run the Streamlit application.
+
+    Returns:
+        None
     """
     # Create variables for the app
     global COLOR_FIELDS
@@ -176,6 +310,8 @@ def main() -> None:
     if "uploader_key" not in st.session_state:
         st.session_state["uploader_key"] = 0
     for key, value in theme.items():
+        if "Color" not in key:  # skip values that aren't colors
+            continue
         st.session_state[key] = value
         COLOR_FIELDS.append(key)
     left, right = st.columns(2)
@@ -186,49 +322,17 @@ def main() -> None:
         create_color_picker(field, form)
     form.form_submit_button(on_click=write_session_state_to_toml)
     left.subheader("The current colors")
-    left.table(pd.DataFrame().from_dict(read_toml_to_dict(), orient="index"
-                                        ).style.apply(color_cells_by_value,
-                                                      axis=1, subset=[0]),
-               hide_header=True)
+    theme_settings_table: pd.DataFrame = pd.DataFrame().from_dict(
+        read_toml_to_dict(), orient="index")
+    left.table(theme_settings_table.style.apply(
+        color_cells_by_value, axis=1,
+        subset=[0] if not theme_settings_table.empty else None
+        ), hide_header=True)
     # RIGHT: Showcasing the use of the colors by Streamlit
-    right.header("See the colors")
-    rc1, rc2, rc3 = right.columns(3)
-    rc1.button("Reset toml file", type="primary",
-               on_click=reset_toml_file_to_default)
-    rc2.button("Secondary button", type="secondary")
-    rc3.button("Tertiary button", type="tertiary")
-    rc1.link_button("Link button", url="")
-    create_download_button(rc2)
-    create_file_uploader(rc3, "rc3")
-    right.multiselect("Multiselect", options=COLOR_FIELDS,
-                      default=COLOR_FIELDS[-1])
-    container = right.container(border=True)
-    container.subheader("Inside a container")
-    container.markdown(("This is Markdown test. "
-                        "This is `inline code` in Markdown. "
-                        "This is a link to the [Streamlit docs]()."))
-    container.code("for i in range(9): print(i)")
-    right.dataframe(data=pd.DataFrame(["value"], columns=["Header"]))
-    # SIDEBAR: Mimick the right panel
+    create_page_segment(right, "See the colors")
+    # SIDEBAR: Showcasing the use of the colors by Streamlit
     sidebar = st.sidebar
-    sidebar.header("Sidebar")
-    sc1, sc2, sc3 = sidebar.columns(3)
-    sc1.button("Reset toml file", type="primary",
-               on_click=reset_toml_file_to_default)
-    sc2.button("Secondary button", type="secondary")
-    sc3.button("Tertiary button", type="tertiary")
-    sc1.link_button("Link button", url="")
-    create_download_button(sc2)
-    create_file_uploader(sc3, "sc3")
-    sidebar.multiselect("Multiselect", options=COLOR_FIELDS,
-                        default=COLOR_FIELDS[-1])
-    container_sidebar = sidebar.container(border=True)
-    container_sidebar.subheader("Inside a container")
-    container_sidebar.markdown(("This is Markdown test. "
-                                "This is `inline code` in Markdown. "
-                                "This is a link to the [Streamlit docs]()."))
-    container_sidebar.code("for i in range(9): print(i)")
-    sidebar.dataframe(data=pd.DataFrame(["value"], columns=["Header"]))
+    create_page_segment(sidebar, "See the colors in the sidebar")
 
 
 if __name__ == "__main__":
