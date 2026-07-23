@@ -65,6 +65,7 @@ def lazy_read_zip_file_contents(path: str
     # Handle the case where the ZIP file is invalid
     except (zipfile.BadZipFile, PermissionError) as exception:
         warnings.warn(f"{exception}: {path}")
+        return {}
 
 
 def demo(depth: int = 3):
@@ -90,8 +91,7 @@ def demo(depth: int = 3):
 
     sizes: typing.List[tuple] = []
     search_path: str = os.path.join(*[".."]*max(abs(depth), 1), "**", "*.zip")
-    paths: typing.Generator[str, None, None] = glob.iglob(search_path,
-                                                          recursive=True)
+    paths: typing.Iterator[str] = glob.iglob(search_path, recursive=True)
 
     for path in paths:
         dic: typing.Dict = lazy_read_zip_file_contents(path)

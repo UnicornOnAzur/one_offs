@@ -17,14 +17,15 @@ import pandas as pd
 import streamlit as st
 import toml
 # Constants
+COLOR_FIELDS: list[str] = []
 THEME_HEADER: str = "theme"
 StreamlitObject = st._DeltaGenerator
-WidgetFunctionArgs: typing.TypeAlias = typing.Tuple[str, StreamlitObject | types.ModuleType]  # noqa: E501
-DecoratedFunction: typing.TypeAlias = typing.Callable[..., StreamlitObject]
+StreamlitPageSegment = StreamlitObject | types.ModuleType
+WrappedFunction = typing.Callable[[str, StreamlitPageSegment], None]
 
 
 ###############################################################################
-# General functions                                                           #
+# General                                                                     #
 ###############################################################################
 def is_app_running_locally() -> bool:
     """
@@ -37,12 +38,14 @@ def is_app_running_locally() -> bool:
     Returns:
         True if the application is running locally, False otherwise.
     """
-    return st.context.url.startswith("http://localhost")
+    if (url := st.context.url) is not None:
+        return url.startswith("http://localhost")
+    return False
 
 
 @lambda _: _()
 @st.cache_data()
-def determine_path() -> typing.Tuple[str]:
+def determine_path() -> typing.Tuple[str, str]:
     """
     Determines the file paths for TOML and TXT files based on the current URL.
 
@@ -80,7 +83,9 @@ def color_cells_by_value(values: pd.Series) -> typing.List[str]:
 ###############################################################################
 # Streamlit widget related functions                                          #
 ###############################################################################
-def set_widget_in_columns(number_of_columns: int = 2) -> DecoratedFunction:
+def set_widget_in_columns(
+        number_of_columns: int = 2
+        ) -> typing.Callable[[WrappedFunction], WrappedFunction]:
     """
     A decorator to arrange the widget in a specified number of columns.
 
@@ -90,8 +95,7 @@ def set_widget_in_columns(number_of_columns: int = 2) -> DecoratedFunction:
     Returns:
         A wrapper function that manages column placement.
     """
-    def decorator(func: typing.Callable[[WidgetFunctionArgs], StreamlitObject]
-                  ) -> DecoratedFunction:
+    def decorator(func):
         """
         Wraps the original function to manage column placement. Initializes
         wrapper.count and wrapper.columns to maintain state.
@@ -103,33 +107,31 @@ def set_widget_in_columns(number_of_columns: int = 2) -> DecoratedFunction:
             The wrapper function that manages column placement.
         """
         @functools.wraps(func)
-        def wrapper(*args: WidgetFunctionArgs) -> StreamlitObject:
+        def wrapper(name: str, page_segment: StreamlitPageSegment) -> None:
             """
             Manages the placement of widgets in columns. Uses wrapper.count and
             wrapper.columns to maintain state.
 
             Parameters:
-                *args : The field name and page segment.
+                name : The field name and page segment.
+                page_segment: The Streamlit page element where the columns are
+                created in.
 
             Returns:
-                The widget created by the inner function.
+                None
             """
-            name, page_segment = args
             if not wrapper.columns:
                 wrapper.columns = page_segment.columns(number_of_columns)
-            widget: StreamlitObject = func(
-                name, wrapper.columns[wrapper.count % number_of_columns])
+            func(name, wrapper.columns[wrapper.count % number_of_columns])
             wrapper.count += 1
-            return widget
         wrapper.count = 0
-        wrapper.columns = []  # typing.List[StreamlitObject]
+        wrapper.columns = []
         return wrapper
     return decorator
 
 
 @set_widget_in_columns(3)
-def create_color_picker(field_name: str, column: StreamlitObject
-                        ) -> StreamlitObject:
+def create_color_picker(field_name: str, column: StreamlitPageSegment) -> None:
     """
     Creates a color picker widget in the specified column.
 
@@ -138,9 +140,9 @@ def create_color_picker(field_name: str, column: StreamlitObject
         column : The column where the color picker will be placed.
 
     Returns:
-        The color picker widget.
+        None
     """
-    return column.color_picker(field_name, key=field_name)
+    column.color_picker(field_name, key=field_name)
 
 
 def create_download_button(column: StreamlitObject) -> None:
@@ -258,6 +260,7 @@ def read_toml_to_dict() -> typing.Dict[str, str]:
         except KeyError:
             st.toast(f"TOML is missing a {THEME_HEADER} header")
             reset_toml_file_to_default()
+            return tomllib.load(file)[THEME_HEADER]
 
 
 def write_session_state_to_toml() -> None:
@@ -303,8 +306,6 @@ def main() -> None:
         None
     """
     # Create variables for the app
-    global COLOR_FIELDS
-    COLOR_FIELDS = []
     st.set_page_config(layout="wide")
     theme: typing.Dict[str, str] = read_toml_to_dict()
     if "uploader_key" not in st.session_state:
