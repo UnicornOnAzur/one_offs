@@ -105,12 +105,7 @@ def step_3(
     authobject = getattr(smtp_server, method_name)
     initial_response = authobject()
     response = encode_base64(initial_response.encode(smtp_server.command_encoding), eol='')
-    (code, resp) = smtp_server.docmd("AUTH", authmethod + " " + response)
-    while code == 334:
-        challenge = base64.decodebytes(resp)
-        response = encode_base64(
-            authobject(challenge).encode(smtp_server.command_encoding), eol='')
-        smtp_server.docmd(response)
+    _ = smtp_server.docmd("AUTH", authmethod + " " + response)
     # Send mail
     smtp_server.ehlo_or_helo_if_needed()
     smtp_server.mail(user)
@@ -159,13 +154,7 @@ def step_4(
     initial_response = authobject()
     response = encode_base64(initial_response.encode(smtp_server.command_encoding), eol='')
     smtp_server.putcmd("AUTH", authmethod + " " + response)
-    (code, _) = smtp_server.getreply()
-    while code == 334:
-        challenge = base64.decodebytes(resp)
-        response = encode_base64(
-            authobject(challenge).encode(smtp_server.command_encoding), eol='')
-        smtp_server.putcmd(response)
-        smtp_server.getreply()
+    smtp_server.getreply()
     # Send mail
     smtp_server.putcmd(smtp_server.ehlo_msg, smtp_server.local_hostname)
     smtp_server.getreply()
@@ -225,13 +214,7 @@ def step_5(
     initial_response = authobject()
     response = encode_base64(initial_response.encode(smtp_server.command_encoding), eol='')
     smtp_server.send(f"AUTH {authmethod} {response}{smtplib.CRLF}".encode("utf-8"))
-    (code, _) = smtp_server.getreply()
-    while code == 334:
-        challenge = base64.decodebytes(resp)
-        response = encode_base64(
-            authobject(challenge).encode(smtp_server.command_encoding), eol='')
-        smtp_server.send(f"{response} {smtplib.CRLF}".encode("utf-8"))
-        smtp_server.getreply()
+    smtp_server.getreply()
     # Send mail
     smtp_server.send(f"{smtp_server.ehlo_msg} {smtp_server.local_hostname} {smtplib.CRLF}".encode("utf-8"))
     smtp_server.getreply()
@@ -293,15 +276,7 @@ def step_6(
     initial_response = authobject()
     response = encode_base64(initial_response.encode(smtp_server.command_encoding), eol='')
     smtp_server.sock.sendall(f"AUTH {authmethod} {response}{smtplib.CRLF}".encode("utf-8"))
-    lines = smtp_server.sock.makefile("rb").readline(MAXLINE)
-    code = int(lines[:3])
-    resp: bytes = lines[4:]
-    while code == 334:
-        challenge = base64.decodebytes(resp)
-        response = encode_base64(
-            authobject(challenge).encode(smtp_server.command_encoding), eol='')
-        smtp_server.sock.sendall(f"{response} {smtplib.CRLF}".encode("utf-8"))
-        smtp_server.sock.makefile("rb").readline(MAXLINE)
+    smtp_server.sock.makefile("rb").readline(MAXLINE)
     # Send mail
     smtp_server.sock.sendall(f"{smtp_server.ehlo_msg} {smtp_server.local_hostname} {smtplib.CRLF}".encode("utf-8"))
     smtp_server.sock.makefile("rb").readline(MAXLINE)
@@ -359,15 +334,7 @@ def step_7(
     initial_response = authobject()
     response = encode_base64(initial_response.encode('ascii'), eol='')
     socket_.sendall(f"AUTH {authmethod} {response}{smtplib.CRLF}".encode("utf-8"))
-    lines = socket_.makefile("rb").readline(MAXLINE)
-    code = int(lines[:3])
-    resp = lines[4:]
-    while code == 334:
-        challenge = base64.decodebytes(resp)
-        response = encode_base64(
-            authobject(challenge).encode('ascii'), eol='')
-        socket_.sendall(f"{response} {smtplib.CRLF}".encode("utf-8"))
-        socket_.makefile("rb").readline(MAXLINE)
+    socket_.makefile("rb").readline(MAXLINE)
     # Send mail
     socket_.sendall(f"{ehlo_msg} {local_hostname} {smtplib.CRLF}".encode("utf-8"))
     socket_.makefile("rb").readline(MAXLINE)
