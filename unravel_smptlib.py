@@ -1,12 +1,11 @@
-import base64
 from email.base64mime import body_encode as encode_base64
-import email.message
-import email.utils
 import re
 import smtplib
 import socket
 import ssl
 #
+CRLF = "\r\n"
+bCRLF = b"\r\n"
 MAXLINE: int = 8192
 
 
@@ -24,6 +23,8 @@ def step_1(
     - title: Subject of the email
     - body: Body content of the email
     """
+    import email.message
+
     message = email.message.EmailMessage()
     message["Subject"] = f"{title} 1"
     message["From"] = user
@@ -123,6 +124,8 @@ def step_4(
 
     Parameters: (no change)
     """
+    import email.utils
+
     message = "\r\n".join([f"Subject: {title} 4",
                            f"From: {user}", f"To: {user}",
                            'Content-Type: text/plain; charset="utf-8"',
@@ -218,10 +221,9 @@ def step_5(
     # Send mail
     smtp_server.send(f"{smtp_server.ehlo_msg} {smtp_server.local_hostname} {smtplib.CRLF}".encode("utf-8"))
     smtp_server.getreply()
-    _, addr = email.utils.parseaddr(user)
-    smtp_server.send(f"mail from:<{addr}> {smtplib.CRLF}".encode("utf-8"))
+    smtp_server.send(f"mail from:<{user}> {smtplib.CRLF}".encode("utf-8"))
     smtp_server.getreply()
-    smtp_server.send(f"rcpt to:<{addr}> {smtplib.CRLF}".encode("utf-8"))
+    smtp_server.send(f"rcpt to:<{user}> {smtplib.CRLF}".encode("utf-8"))
     smtp_server.getreply()
     smtp_server.send(f"data {smtplib.CRLF}".encode("utf-8"))
     smtp_server.getreply()
@@ -280,10 +282,9 @@ def step_6(
     # Send mail
     smtp_server.sock.sendall(f"{smtp_server.ehlo_msg} {smtp_server.local_hostname} {smtplib.CRLF}".encode("utf-8"))
     smtp_server.sock.makefile("rb").readline(MAXLINE)
-    _, addr = email.utils.parseaddr(user)
-    smtp_server.sock.sendall(f"mail from:<{addr}> {smtplib.CRLF}".encode("utf-8"))
+    smtp_server.sock.sendall(f"mail from:<{user}> {smtplib.CRLF}".encode("utf-8"))
     smtp_server.sock.makefile("rb").readline(MAXLINE)
-    smtp_server.sock.sendall(f"rcpt to:<{addr}> {smtplib.CRLF}".encode("utf-8"))
+    smtp_server.sock.sendall(f"rcpt to:<{user}> {smtplib.CRLF}".encode("utf-8"))
     smtp_server.sock.makefile("rb").readline(MAXLINE)
     smtp_server.sock.sendall(f"data {smtplib.CRLF}".encode("utf-8"))
     smtp_server.sock.makefile("rb").readline(MAXLINE)
@@ -318,42 +319,118 @@ def step_7(
     socket_ = socket.create_connection((host, port))
     socket_.makefile("rb").readline(MAXLINE)
     # Start TLS
-    socket_.sendall(f"{ehlo_msg} {local_hostname} {smtplib.CRLF}".encode("utf-8"))
+    socket_.sendall(f"{ehlo_msg} {local_hostname} {CRLF}".encode("utf-8"))
     socket_.makefile("rb").readline(MAXLINE)
-    socket_.sendall(f"STARTTLS {smtplib.CRLF}".encode("utf-8"))
+    socket_.sendall(f"STARTTLS {CRLF}".encode("utf-8"))
     lines = socket_.makefile("rb").readline(MAXLINE)
     resp = int(lines[:3])
     if resp == 220:
         context = ssl._create_stdlib_context()
     socket_ = context.wrap_socket(socket_, server_hostname=host)
     # Login
-    socket_.sendall(f"{ehlo_msg} {local_hostname} {smtplib.CRLF}".encode("utf-8"))
+    socket_.sendall(f"{ehlo_msg} {local_hostname} {CRLF}".encode("utf-8"))
     socket_.makefile("rb").readline(MAXLINE)
     authmethod = "plain"
     authobject = lambda: "\0%s\0%s" % (user, password)
     initial_response = authobject()
     response = encode_base64(initial_response.encode('ascii'), eol='')
-    socket_.sendall(f"AUTH {authmethod} {response}{smtplib.CRLF}".encode("utf-8"))
+    socket_.sendall(f"AUTH {authmethod} {response}{CRLF}".encode("utf-8"))
     socket_.makefile("rb").readline(MAXLINE)
     # Send mail
-    socket_.sendall(f"{ehlo_msg} {local_hostname} {smtplib.CRLF}".encode("utf-8"))
+    socket_.sendall(f"{ehlo_msg} {local_hostname} {CRLF}".encode("utf-8"))
     socket_.makefile("rb").readline(MAXLINE)
-    _, addr = email.utils.parseaddr(user)
-    socket_.sendall(f"mail from:<{addr}> {smtplib.CRLF}".encode("utf-8"))
+    socket_.sendall(f"mail from:<{user}> {CRLF}".encode("utf-8"))
     socket_.makefile("rb").readline(MAXLINE)
-    socket_.sendall(f"rcpt to:<{addr}> {smtplib.CRLF}".encode("utf-8"))
+    socket_.sendall(f"rcpt to:<{user}> {CRLF}".encode("utf-8"))
     socket_.makefile("rb").readline(MAXLINE)
-    socket_.sendall(f"data {smtplib.CRLF}".encode("utf-8"))
+    socket_.sendall(f"data {CRLF}".encode("utf-8"))
     socket_.makefile("rb").readline(MAXLINE)
+    message_bytes = re.sub(br"(?m)^\.", b"..", message)
+    if message_bytes[-2:] != bCRLF:
+        message_bytes = message_bytes + bCRLF
+    message_bytes = message_bytes + b"." + bCRLF
+    socket_.sendall(message_bytes)
+    socket_.makefile("rb").readline(MAXLINE)
+    # Close
+    socket_.sendall(f"quit {CRLF}".encode("utf-8"))
+    socket_.close()
+
+
+def verbose(
+        host: str, port: int, user: str, password: str, title: str, body: str):
+    message = "\r\n".join([f"Subject: {title} verbose",
+                           f"From: {user}",
+                           f"To: {user}",
+                           'Content-Type: text/plain; charset="utf-8"',
+                           "Content-Transfer-Encoding: 7bit",
+                           "MIME-Version: 1.0\r\n",
+                           body, ""]).encode("utf-8")    
+
+    smtp_server = smtplib.SMTP()
+    # Connect
+    smtp_server.connect(host=host, port=port)
+    # Start TLS
+    smtp_server.putcmd(smtp_server.ehlo_msg, smtp_server.local_hostname)
+    print(f"Sent:\t\t{smtp_server.ehlo_msg} {smtp_server.local_hostname}")
+    (resp, msg) = smtp_server.getreply()
+    print(f"Received:\t{resp} {msg}")
+    smtp_server.ehlo_resp = msg
+    smtp_server.putcmd("STARTTLS")
+    print("Sent:\t\tSTARTTLS")
+    (resp, msg) = smtp_server.getreply()
+    print(f"Received:\t{resp} {msg}")
+    if resp == 220:
+        context = ssl._create_stdlib_context()
+    smtp_server.sock = context.wrap_socket(smtp_server.sock,
+                                           server_hostname=smtp_server._host)
+    smtp_server.file = None
+    smtp_server.ehlo_resp = None
+    # Login
+    smtp_server.putcmd(smtp_server.ehlo_msg, smtp_server.local_hostname)
+    print(f"Sent:\t\t{smtp_server.ehlo_msg} {smtp_server.local_hostname}")
+    (resp, msg) = smtp_server.getreply()
+    print(f"Received:\t{resp} {msg}")
+    authmethod = "plain"
+    smtp_server.user, smtp_server.password = user, password
+    method_name = "auth_" + authmethod.lower().replace("-", "_")
+    authobject = getattr(smtp_server, method_name)
+    initial_response = authobject()
+    response = encode_base64(initial_response.encode(smtp_server.command_encoding), eol='')
+    smtp_server.putcmd("AUTH", authmethod + " " + response)
+    print(f"Sent:\t\t{'AUTH'}")
+    (resp, msg) = smtp_server.getreply()
+    print(f"Received:\t{resp} {msg}")
+    # Send mail
+    smtp_server.putcmd(smtp_server.ehlo_msg, smtp_server.local_hostname)
+    print(f"Sent:\t\t{smtp_server.ehlo_msg} {smtp_server.local_hostname}")
+    (resp, msg) = smtp_server.getreply()
+    print(f"Received:\t{resp} {msg}")
+    smtp_server.putcmd("mail", f"from:<{user}>")
+    print("Sent:\t\tmail from:...")
+    (resp, msg) = smtp_server.getreply()
+    print(f"Received:\t{resp} {msg}")
+    smtp_server.putcmd("rcpt", f"to:<{user}>")
+    print("Sent:\t\trcpt to:...")
+    (resp, msg) = smtp_server.getreply()
+    print(f"Received:\t{resp} {msg}")
+    smtp_server.putcmd("data")
+    print("Sent:\t\tdata")
+    (resp, msg) = smtp_server.getreply()
+    print(f"Received:\t{resp} {msg}")
     message_bytes = re.sub(br"(?m)^\.", b"..", message)
     if message_bytes[-2:] != smtplib.bCRLF:
         message_bytes = message_bytes + smtplib.bCRLF
     message_bytes = message_bytes + b"." + smtplib.bCRLF
-    socket_.sendall(message_bytes)
-    socket_.makefile("rb").readline(MAXLINE)
+    smtp_server.send(message_bytes)
+    print(f"Sent:\t\t{message_bytes}")
+    (resp, msg) = smtp_server.getreply()
+    print(f"Received:\t{resp} {msg}")
     # Close
-    socket_.sendall(f"quit {smtplib.CRLF}".encode("utf-8"))
-    socket_.close()
+    smtp_server.putcmd("quit")
+    print("Sent:\t\tquit")
+    (resp, msg) = smtp_server.getreply()
+    print(f"Received:\t{resp} {msg}")
+    smtp_server.close()
 
 
 def demo():
@@ -374,6 +451,8 @@ def demo():
             step(host, port, username, password, title, body)
         except Exception as e:
             print(step.__name__, e)
+
+    verbose(host, port, username, password, title, body)
 
 
 if __name__ == "__main__":
